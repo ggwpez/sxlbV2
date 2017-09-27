@@ -10,7 +10,7 @@ uint32_t init_gdt()
 	gdt.base = (uint32_t)&gdt_entrys;
 
 	gate_set_data(0, 0, 0, 0, 0);	//null desc
-	gate_set_data(1, 0, 0xffffffff, 0x9a, 0xCF);	// CF
+	gate_set_data(1, 0, 0xffffffff, 0x9a, 0xCF); // CF
 	gate_set_data(2, 0, 0xffffffff, 0x92, 0xCF);
 	gate_set_data(3, 0, 0xffffffff, 0xFA, 0xCF); // usermode code segment
 	gate_set_data(4, 0, 0xffffffff, 0xF2, 0xCF); // usermode data segment

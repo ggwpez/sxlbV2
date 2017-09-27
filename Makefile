@@ -1,5 +1,6 @@
 BIN := $(shell pwd)/bin/
 INCLUDE := $(shell pwd)/include/
+export DEPDIR
 export BIN
 export INCLUDE
 
@@ -18,8 +19,10 @@ export AS    = nasm
 
 ERRFLAGS := -Wextra -Wpedantic -Wall -Werror
 DBGFLAGS := -g3 -ggdb3
-export GCCFLAGS = -O0 -std=c11 $(DBGFLAGS) $(ERRFLAGS) -I$(INCLUDE)
-export GCXXFLAGS = -O0 -std=c++11 $(DBGFLAGS) $(ERRFLAGS) -I$(INCLUDE)
+export DEPFLAGS = -MT $$@ -MMD -MP -MF $$(DEPDIR)$$*.Td
+export PCOMPILE = mv -f $$(DEPDIR)$$*.Td $$(DEPDIR)$$*.d && touch $$@
+export GCCFLAGS = -fleading-underscore -O0 -std=c11 $(DBGFLAGS) $(ERRFLAGS) -I$(INCLUDE) $(DEPFLAGS)
+export GCXXFLAGS = -fleading-underscore -fno-exceptions -fno-rtti -O0 -std=c++11 $(DBGFLAGS) $(ERRFLAGS) -I$(INCLUDE) $(DEPFLAGS)
 export GASFLAGS = -F dwarf -g -w+orphan-labels
 export GLDFLAGS = $(DBGFLAGS)
 

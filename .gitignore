@@ -36,3 +36,6 @@ ui_*.h
 # QtCtreator CMake
 CMakeLists.txt.user*
 
+# Deps
+*.d
+*.Td

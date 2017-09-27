@@ -1,16 +1,24 @@
 BINDIR := $(BIN)stage1/
+DEPDIR := $(BINDIR).d/
 SHAREBIN := $(BINDIR)share/
 LIBBIN := $(SHAREBIN)lib/
 SHARE := ../share/
 
-OBJECTS := $(BINDIR)entry.o $(BINDIR)elf-64.o $(BINDIR)loader32.o $(BINDIR)multiboot.o $(BINDIR)gdt.o $(BINDIR)gdt_flush.o $(BINDIR)kernel_jumper.o
+SOURCES := $(wildcard *.c) $(wildcard *.cpp) $(wildcard *.asm)
+OBJECTS := $(SOURCES:%.cpp=$(BINDIR)%.o)
+OBJECTS := $(OBJECTS:%.c=$(BINDIR)%.o)
+OBJECTS := $(OBJECTS:%.asm=$(BINDIR)%.o)
+
 ASFLAGSOBJ := -i $(shell pwd)/$(SRCDIR) -O32 -f elf32 $(GASFLAGS)
 
-CCFLAGS  := -fno-stack-protector -m32 -ffreestanding -fleading-underscore -D__IS_KERNEL__ $(GCCFLAGS) -I$(INCLUDE)share/
-CXXFLAGS  := -fno-stack-protector -m32 -ffreestanding -fleading-underscore -fno-exceptions -fno-rtti -D__IS_KERNEL__ $(GCXXFLAGS) -I$(INCLUDE)share/
-LDFLAGS  := -T link.ld -ffreestanding -nostdlib -nostartfiles -nodefaultlibs -lgcc -static $(GLDFLAGS)
+CCFLAGS  = -m32 -fno-stack-protector -ffreestanding -D__IS_KERNEL__ $(GCCFLAGS)  -I$(INCLUDE)share/
+CXXFLAGS = -m32 -fno-stack-protector -ffreestanding -D__IS_KERNEL__ $(GCXXFLAGS) -I$(INCLUDE)share/
+LDFLAGS	:= -T link.ld -ffreestanding -nostdlib -nostartfiles -nodefaultlibs -lgcc -static $(GLDFLAGS)
 
-all: $(BINDIR)stage1.bin
+all: | $(DEPDIR) $(BINDIR)stage1.bin
+
+$(DEPDIR):
+	@mkdir -p $@
 
 $(BINDIR)stage1.bin: $(LIBBIN)libk.a $(OBJECTS)
 	$(CXX32) $(LDFLAGS) $(OBJECTS) -L$(LIBBIN) -lk -static -o $(BINDIR)stage1.bin
@@ -23,14 +31,15 @@ $(LIBBIN)libk.a: FORCE
 $(BINDIR)%.o: %.asm
 	$(AS) $(ASFLAGSOBJ) $< -o $@
 
-$(SHAREBIN)%.o: $(SHARE)%.asm
-	$(AS) $(ASFLAGSOBJ) $< -o $@
-
-$(SHAREBIN)%.o: $(SHARE)%.cpp
-	$(CXX32) $(CXXFLAGS) -c $< -o $@
-
-$(BINDIR)%.o: %.cpp
-	$(CXX32) $(CXXFLAGS) -c $< -o $@
-
-$(BINDIR)%.o: %.c
+$(BINDIR)%.o: %.c $(DEPDIR)%.d
 	$(CC32) $(CCFLAGS) -c $< -o $@
+	$(PCOMPILE)
+
+$(BINDIR)%.o: %.cpp $(DEPDIR)%.d
+	$(CXX32) $(CXXFLAGS) -c $< -o $@
+	$(PCOMPILE)
+
+$(DEPDIR)%.d: ;
+.PRECIOUS: $(DEPDIR)%.d
+
+include $(wildcard $(patsubst %,$(DEPDIR)%.d,$(basename $(SOURCES))))

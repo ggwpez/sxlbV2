@@ -1,10 +1,12 @@
 SOURCES := $(wildcard *.c) $(wildcard *.cpp) $(wildcard *.asm)
-OBJECTS := $(SOURCES:%.cpp=$(LIBBIN)%.o) $(SOURCES:%.c=$(LIBBIN)%.o) $(SOURCES:%.asm=$(LIBBIN)%.o)
+OBJECTS := $(SOURCES:%.cpp=$(LIBBIN)%.o)
+OBJECTS := $(OBJECTS:%.c=$(LIBBIN)%.o)
+OBJECTS := $(OBJECTS:%.asm=$(LIBBIN)%.o)
 
 ASFLAGS := -i $(shell pwd)/$(SRCDIR) $(GASFLAGS)
 
-CCFLAGS  := -fno-stack-protector -ffreestanding -fleading-underscore -D__IS_LIB__ $(GCCFLAGS) -I$(INCLUDE)share/lib/
-CXXFLAGS  := -fno-stack-protector -ffreestanding -fleading-underscore -D__IS_LIB__ $(GCXXFLAGS) -I$(INCLUDE)share/lib/
+CCFLAGS  = -fno-stack-protector -ffreestanding -D__IS_LIB__ $(GCCFLAGS) -I$(INCLUDE)share/lib/
+CXXFLAGS  = -fno-stack-protector -ffreestanding -D__IS_LIB__ $(GCXXFLAGS) -I$(INCLUDE)share/lib/
 LDFLAGS  := -T link.ld -ffreestanding -nostartfiles -nodefaultlibs -nostdlib -lgcc -static $(GLDFLAGS)
 
 ifeq ($(LIB_BITS),64)
