@@ -1,6 +1,6 @@
 #include "stage1/elf-64.h"
 #include "lib/string.h"
-#include "kspace.h"
+#include "lib/kspace.h"
 #include <stddef.h>
 #include <limits.h>
 

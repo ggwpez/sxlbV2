@@ -1,6 +1,6 @@
 #pragma once
 #include <stdint.h>
-#include "../share/defines.h"
+#include "lib/defines.h"
 
 typedef enum elf_prog_type
 {

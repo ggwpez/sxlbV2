@@ -19,6 +19,10 @@
  *  IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+
+// Avoid pedantic warnings
+#pragma GCC system_header
+
 #ifdef __ASSEMBLY__
 #define MULTIBOOT_TAG_ALIGN                  8
 #define MULTIBOOT_TAG_TYPE_END               0
@@ -411,7 +415,7 @@ struct multiboot_tag_efi_mmap
 };
 
 #include <stdint.h>
-#include "../share/defines.h"
+#include "lib/defines.h"
 
 C_BEGIN
 uint32_t init(void const* ptr, unsigned magic);

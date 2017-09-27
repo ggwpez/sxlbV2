@@ -1,5 +1,6 @@
 #pragma once
 #include <stdint.h>
+#include "defines.h"
 
 namespace system
 {
@@ -120,6 +121,6 @@ namespace system
 	uint32_t cpu_set_config(CPU_CONFIG_OP op, uint32_t v);
 	void cpu_dump_all_config();
 
-	uint32_t cpu_get_register_ctrl(uint8_t number);
-	void cpu_set_register_ctrl(uint8_t number, uint32_t value);
+	cpu_word_t cpu_get_register_ctrl(uint8_t number);
+	void cpu_set_register_ctrl(uint8_t number, cpu_word_t value);
 }

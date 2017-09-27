@@ -1,5 +1,5 @@
-#include "../include/stage1/gdt.h"
-#include "share/kspace.h"
+#include "stage1/gdt.h"
+#include "lib/kspace.h"
 
 static struct gdt_entry gdt_entrys[GDT_ENTRYS];
 static struct gdt_ptr gdt;

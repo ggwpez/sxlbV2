@@ -1,6 +1,6 @@
 #include "stage1/multiboot.h"
 #include "stage1/elf-64.h"
-#include "share/kspace.h"
+#include "lib/kspace.h"
 
 void assert(int a)
 {
@@ -16,7 +16,7 @@ uint32_t init(void const* ptr, unsigned magic)
 	assert(magic == MULTIBOOT2_BOOTLOADER_MAGIC);
 	assert(((unsigned)ptr &7) == 0);
 
-	for (tag = (struct multiboot_tag*)(ptr +8);
+	for (tag = (struct multiboot_tag*)((char const*)ptr +8);
 		 tag->type != MULTIBOOT_TAG_TYPE_END;
 		 tag = (struct multiboot_tag*) ((multiboot_uint8_t*) tag               //warum bin ich hier
 		 + ((tag->size + 7) & ~7)))
@@ -39,4 +39,5 @@ uint32_t init(void const* ptr, unsigned magic)
 		}
 	}
 
+	return 0;
 }

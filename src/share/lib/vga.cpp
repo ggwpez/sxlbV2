@@ -1,5 +1,5 @@
 #include "vga.hpp"
-#include "share/lspace.h"
+#include "lspace.h"
 #include <stdint.h>
 
 namespace vga
@@ -8,7 +8,7 @@ namespace vga
 	{
 		char c;
 
-		while (c = *__str++)
+		while ((c = *__str++))
 			putc(c);
 	}
 

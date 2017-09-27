@@ -1,5 +1,6 @@
-#include "share/cpuid.hpp"
-#include "share/kspace.h"
+#include "cpuid.hpp"
+#include "lspace.h"
+#include "abort.hpp"
 
 extern "C"
 {
@@ -10,10 +11,9 @@ extern "C"
 	uint32_t asm_CPUID_get_feature(uint8_t reg_n);
 }
 
-#include "share/abort.hpp"
 namespace system
 {
-	static uint8_t buffer[64];
+	//static uint8_t buffer[64];
 
 	uint32_t cpu_get_config(CPU_CONFIG_OP op)
 	{
@@ -43,7 +43,7 @@ namespace system
 				uint8_t shift = ((uint32_t)op & B(11111));
 
 				uint32_t ret = asm_CPUID_get_feature(reg);
-				if (ret == -1)
+				if (ret == 0xffffffff)
 					return 0;
 
 				return (ret & BIT(shift)) >> shift;
@@ -73,8 +73,13 @@ namespace system
 			uint8_t shift = ((uint32_t)op & B(11111));
 			uint32_t reg_val = cpu_get_register_ctrl(nm);
 
-			reg_val |= BIT(shift);
-			cpu_set_register_ctrl(nm, reg_val);
+			// TODO not sure here
+			if (v)
+				reg_val |= BIT(shift);
+			else
+				reg_val &= ~BIT(shift);
+
+			cpu_set_register_ctrl(reg, reg_val);
 
 			return cpu_get_config(op);
 		}
@@ -82,9 +87,9 @@ namespace system
 	}
 
 	/*Gets the value from: cr0, cr2, cr3, cr4*/
-	uint32_t cpu_get_register_ctrl(uint8_t number)
+	cpu_word_t cpu_get_register_ctrl(uint8_t number)
 	{
-		uint32_t out = 0;
+		cpu_word_t out = 0;
 
 		switch (number)
 		{
@@ -106,10 +111,10 @@ namespace system
 		}
 
 		return out;
-	};
+	}
 
 	/*Sets the values for: cr0, cr2, cr3, cr4*/
-	void cpu_set_register_ctrl(uint8_t number, uint32_t value)
+	void cpu_set_register_ctrl(uint8_t number, cpu_word_t value)
 	{
 		switch (number)
 		{
@@ -129,5 +134,5 @@ namespace system
 				__asm__ __volatile__("mov %0, %%cr4":: "r"(value)); // write cr4
 				break;
 		}
-	};
+	}
 }

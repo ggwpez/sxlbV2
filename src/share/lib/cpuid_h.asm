@@ -1,3 +1,4 @@
+[BITS 32]
 [SECTION .text]
 [GLOBAL _asm_CPUID_supported]
 [GLOBAL _asm_CPUID_get_vendor]

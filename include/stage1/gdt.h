@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../share/defines.h"
+#include "lib/defines.h"
 #include <stdint.h>
 
 #define GDT_ENTRYS 5

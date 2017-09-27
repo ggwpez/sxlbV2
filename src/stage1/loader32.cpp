@@ -1,10 +1,10 @@
 #include <stdint.h>
-#include "share/kspace.h"
+#include "lib/kspace.h"
 #include "stage1/multiboot.h"
 #include "stage1/gdt.h"
-#include "share/cpuid.hpp"
-#include "share/abort.hpp"
-#include "share/lib/vga.hpp"
+#include "lib/cpuid.hpp"
+#include "lib/abort.hpp"
+#include "lib/vga.hpp"
 
 extern "C"
 {

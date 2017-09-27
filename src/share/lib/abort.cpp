@@ -1,6 +1,6 @@
-#include "share/abort.hpp"
-#include "share/kspace.h"
-#include "share/lib/vga.hpp"
+#include "abort.hpp"
+#include "lspace.h"
+#include "vga.hpp"
 
 void abort(char const* msg)
 {
