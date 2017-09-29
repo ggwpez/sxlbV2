@@ -1,45 +1,40 @@
 BINDIR := $(BIN)stage1/
-DEPDIR := $(BINDIR).d/
+include $(DEPMAKER_BEGIN)
+
 SHAREBIN := $(BINDIR)share/
 LIBBIN := $(SHAREBIN)lib/
 SHARE := ../share/
 
-SOURCES := $(wildcard *.c) $(wildcard *.cpp) $(wildcard *.asm)
-OBJECTS := $(SOURCES:%.cpp=$(BINDIR)%.o)
-OBJECTS := $(OBJECTS:%.c=$(BINDIR)%.o)
-OBJECTS := $(OBJECTS:%.asm=$(BINDIR)%.o)
+SOURCES := $(wildcard *.$(EXT_C)) $(wildcard *.$(EXT_C)pp) $(wildcard *.$(EXT_ASM))
+OBJECTS := $(SOURCES:%.$(EXT_CPP)=$(BINDIR)%.$(EXT_OBJ))
+OBJECTS := $(OBJECTS:%.$(EXT_C)=$(BINDIR)%.$(EXT_OBJ))
+OBJECTS := $(OBJECTS:%.$(EXT_ASM)=$(BINDIR)%.$(EXT_OBJ))
 
-ASFLAGSOBJ := -i $(shell pwd)/$(SRCDIR) -O32 -f elf32 $(GASFLAGS)
+ASFLAGSOBJ := -O32 -f elf32 $(GASFLAGS)
 
 CCFLAGS  = -m32 -fno-stack-protector -ffreestanding -D__IS_KERNEL__ $(GCCFLAGS)  -I$(INCLUDE)share/
 CXXFLAGS = -m32 -fno-stack-protector -ffreestanding -D__IS_KERNEL__ $(GCXXFLAGS) -I$(INCLUDE)share/
 LDFLAGS	:= -T link.ld -ffreestanding -nostdlib -nostartfiles -nodefaultlibs -lgcc -static $(GLDFLAGS)
 
-all: | $(DEPDIR) $(BINDIR)stage1.bin
+all: $(BINDIR)stage1.bin
 
-$(DEPDIR):
-	@mkdir -p $@
-
-$(BINDIR)stage1.bin: $(LIBBIN)libk.a $(OBJECTS)
-	$(CXX32) $(LDFLAGS) $(OBJECTS) -L$(LIBBIN) -lk -static -o $(BINDIR)stage1.bin
+$(BINDIR)stage1.bin: $(LIBBIN)$(LIBK) $(OBJECTS)
+	$(CXX32) $(LDFLAGS) $(OBJECTS) -L$(LIBBIN) -l$(LIBK_LD) -static -o $(BINDIR)stage1.bin
 
 FORCE: ;
 
-$(LIBBIN)libk.a: FORCE
-	@$(MAKE) -C ../share/lib/ LIB_BITS=32 LIBBIN=$(LIBBIN)
+$(LIBBIN)$(LIBK): FORCE
+	@$(MAKE) -C ../share/lib/ BITS=32 BINDIR=$(LIBBIN)
 
-$(BINDIR)%.o: %.asm
+$(BINDIR)%.$(EXT_OBJ): %.$(EXT_ASM)
 	$(AS) $(ASFLAGSOBJ) $< -o $@
 
-$(BINDIR)%.o: %.c $(DEPDIR)%.d
+$(BINDIR)%.$(EXT_OBJ): %.$(EXT_C) $(DEPDIR)%.$(EXT_DEP)
 	$(CC32) $(CCFLAGS) -c $< -o $@
 	$(PCOMPILE)
 
-$(BINDIR)%.o: %.cpp $(DEPDIR)%.d
+$(BINDIR)%.$(EXT_OBJ): %.$(EXT_CPP) $(DEPDIR)%.$(EXT_DEP)
 	$(CXX32) $(CXXFLAGS) -c $< -o $@
 	$(PCOMPILE)
 
-$(DEPDIR)%.d: ;
-.PRECIOUS: $(DEPDIR)%.d
-
-include $(wildcard $(patsubst %,$(DEPDIR)%.d,$(basename $(SOURCES))))
+include $(DEPMAKER_END)

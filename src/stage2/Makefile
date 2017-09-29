@@ -8,13 +8,13 @@ ASFLAGS := -O64 -f elf64 $(GASFLAGS)
 
 all: $(BINDIR)stage2.bin
 
-$(BINDIR)stage2.bin: $(LIBBIN)libk.a $(BINDIR)entry.o
-	$(CXX64) $(LDFLAGS) $(BINDIR)entry.o -o $(BINDIR)stage2.bin
+$(BINDIR)stage2.bin: $(LIBBIN)$(LIBK) $(BINDIR)entry.$(EXT_OBJ)
+	$(CXX64) $(LDFLAGS) $(BINDIR)entry.$(EXT_OBJ) -L$(LIBBIN) -l$(LIBK_LD) -static -o $(BINDIR)stage2.bin
 
 FORCE: ;
 
-$(LIBBIN)libk.a: FORCE
-	@$(MAKE) -C ../share/lib/ LIB_BITS=64 LIBBIN=$(LIBBIN)
+$(LIBBIN)$(LIBK): FORCE
+	@$(MAKE) -C ../share/lib/ BITS=64 BINDIR=$(LIBBIN)
 
-$(BINDIR)%.o: %.asm
+$(BINDIR)%.$(EXT_OBJ): %.$(EXT_ASM)
 	$(AS) $(ASFLAGS) $< -o $@

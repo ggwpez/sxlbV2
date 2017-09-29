@@ -1,43 +1,44 @@
-SOURCES := $(wildcard *.c) $(wildcard *.cpp) $(wildcard *.asm)
-OBJECTS := $(SOURCES:%.cpp=$(LIBBIN)%.o)
-OBJECTS := $(OBJECTS:%.c=$(LIBBIN)%.o)
-OBJECTS := $(OBJECTS:%.asm=$(LIBBIN)%.o)
+include $(DEPMAKER_BEGIN)
 
-ASFLAGS := -i $(shell pwd)/$(SRCDIR) $(GASFLAGS)
+SOURCES := $(wildcard *.$(EXT_C)) $(wildcard *.$(EXT_CPP)) $(wildcard *.$(EXT_ASM))
+OBJECTS := $(SOURCES:%.$(EXT_CPP)=$(BINDIR)%.$(EXT_OBJ))
+OBJECTS := $(OBJECTS:%.$(EXT_C)=$(BINDIR)%.$(EXT_OBJ))
+OBJECTS := $(OBJECTS:%.$(EXT_ASM)=$(BINDIR)%.$(EXT_OBJ))
 
 CCFLAGS  = -fno-stack-protector -ffreestanding -D__IS_LIB__ $(GCCFLAGS) -I$(INCLUDE)share/lib/
 CXXFLAGS  = -fno-stack-protector -ffreestanding -D__IS_LIB__ $(GCXXFLAGS) -I$(INCLUDE)share/lib/
 LDFLAGS  := -T link.ld -ffreestanding -nostartfiles -nodefaultlibs -nostdlib -lgcc -static $(GLDFLAGS)
 
-ifeq ($(LIB_BITS),64)
+ifeq ($(BITS),64)
 	CCL = $(CC64)
 	CXXL = $(CXX64)
 	CCFLAGS += -m64
 	CXXFLAGS += -m64
-	ASFLAGS := -O64 -f elf64 $(ASFLAGS)
+	ASFLAGS := -O64 -f elf64 $(GASFLAGS)
 endif
 
-ifeq ($(LIB_BITS),32)
+ifeq ($(BITS),32)
 	CCL = $(CC32)
 	CXXL = $(CXX32)
 	CCFLAGS += -m32
 	CXXFLAGS += -m32
-	ASFLAGS := -O32 -f elf32 $(ASFLAGS)
+	ASFLAGS := -O32 -f elf32 $(GASFLAGS)
 endif
 
-all: $(LIBBIN)libk.a
+all: $(BINDIR)$(LIBK)
 
-$(LIBBIN)libk.a: | $(LIBBIN) $(OBJECTS)
-	ar rcs $@ $(OBJECTS)
+$(BINDIR)$(LIBK): $(OBJECTS)
+	$(AR) rcs $@ $(OBJECTS)
 
-$(LIBBIN):
-	@mkdir -p $@
-
-$(LIBBIN)%.o: %.c
+$(BINDIR)%.$(EXT_OBJ): %.$(EXT_C) $(DEPDIR)%.$(EXT_DEP)
 	$(CCL) $(CCFLAGS) -c $< -o $@
+	$(PCOMPILE)
 
-$(LIBBIN)%.o: %.cpp
+$(BINDIR)%.$(EXT_OBJ): %.$(EXT_CPP) $(DEPDIR)%.$(EXT_DEP)
 	$(CXXL) $(CXXFLAGS) -c $< -o $@
+	$(PCOMPILE)
 
-$(LIBBIN)%.o: %.asm
+$(BINDIR)%.$(EXT_OBJ): %.$(EXT_ASM)
 	$(AS) $(ASFLAGS) $< -o $@
+
+include $(DEPMAKER_END)
