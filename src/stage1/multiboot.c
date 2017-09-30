@@ -1,12 +1,7 @@
 #include "stage1/multiboot.h"
 #include "stage1/elf-64.h"
 #include "lib/kspace.h"
-
-void assert(int a)
-{
-	if (! a)
-		__asm__("hlt");
-}
+#include "lib/assert.hpp"
 
 char* na = "n/a";
 uint32_t init(void const* ptr, unsigned magic)

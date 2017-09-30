@@ -12,7 +12,7 @@
 	(0##x >> 12 & 0100) | \
 	(0##x >> 14 & 0200))
 
-#define BIT(x) (1 << x)
+#define BIT(x) (uint64_t(1) << x)
 
 #ifdef __cplusplus
 	#define C_BEGIN extern "C" {

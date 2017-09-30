@@ -1,10 +1,11 @@
 #include <stdint.h>
 #include "lib/kspace.h"
 #include "stage1/multiboot.h"
-#include "stage1/gdt.h"
+#include "stage1/gdt-32.h"
 #include "lib/cpuid.hpp"
 #include "lib/abort.hpp"
 #include "lib/vga.hpp"
+#include "lib/assert.hpp"
 
 extern "C"
 {
@@ -27,6 +28,7 @@ void lmain(void const* mbi, unsigned magic)
 
 	// Set up GDT
 
+	assert(0);
 	vga::puts("okokokokoko");
 	__asm__("hlt");
 	uint32_t gdt = init_gdt();

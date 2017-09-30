@@ -1,5 +1,5 @@
 #include "stage1/elf-64.h"
-#include "lib/string.h"
+#include "lib/string.hpp"
 #include "lib/kspace.h"
 #include <stddef.h>
 #include <limits.h>
@@ -37,7 +37,7 @@ uint32_t load_elf(void* elf, elf_status_t* status)
 		if ((ph->__p_addr +ph->size > UINT32_MAX) || ((uint32_t)hdr +ph->offset +ph->size > UINT32_MAX))
 			return 0;
 
-		memcpy((void*)(uint32_t)(ph->__p_addr), (char*)hdr +ph->offset, ph->size);
+		memcpy((void*)(uint32_t)(ph->__p_addr), (void*)((char*)hdr +ph->offset), ph->size);
 	}
 
 	if (hdr->p_entry > UINT32_MAX || ! hdr->p_entry)

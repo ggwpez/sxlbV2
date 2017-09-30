@@ -31,10 +31,11 @@ export EXT_C = c
 export EXT_CPP = cpp
 export EXT_ASM = asm
 export EXT_DEP = d
+export EXT_DEP2 = Td
 export DEPMAKER_BEGIN = $(PWD)src/dep_begin.mk
 export DEPMAKER_END = $(PWD)src/dep_end.mk
-export DEPFLAGS = -MT $$@ -MMD -MP -MF $$(DEPDIR)$$*.Td
-export PCOMPILE = mv -f $$(DEPDIR)$$*.Td $$(DEPDIR)$$*.d && touch $$@
+export DEPFLAGS = -MT $$@ -MMD -MP -MF $$(DEPDIR)$$*.$(EXT_DEP2)
+export PCOMPILE = mv -f $$(DEPDIR)$$*.$(EXT_DEP2) $$(DEPDIR)$$*.$(EXT_DEP) && touch $$@
 export GCCFLAGS = -fleading-underscore $(OPTI) -std=c11 $(DBGFLAGS) $(ERRFLAGS) -I$(INCLUDE) $(DEPFLAGS)
 export GCXXFLAGS = -fleading-underscore $(OPTI) -std=c++11 -fno-exceptions -fno-rtti $(DBGFLAGS) $(ERRFLAGS) -I$(INCLUDE) $(DEPFLAGS)
 export GASFLAGS = -F dwarf -g -w+orphan-labels

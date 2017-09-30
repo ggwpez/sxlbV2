@@ -1,4 +1,4 @@
-#include "stage1/gdt.h"
+#include "stage1/gdt-32.h"
 #include "lib/kspace.h"
 
 static struct gdt_entry gdt_entrys[GDT_ENTRYS];

@@ -8,6 +8,7 @@ void abort(char const* msg)
 	vga::puts("ERROR:");
 	vga::puts(msg);
 
+	__asm__("cli");
 	__asm__("hlt");
 	while (1);
 }
