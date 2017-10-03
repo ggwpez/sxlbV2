@@ -27,7 +27,7 @@ cpu: count=1, ips=60000000, reset_on_triple_fault=0, ignore_bad_msrs=1
 cpuid: x86_64=1, stepping=3, vendor_string="GenuineIntel", brand_string="              Intel(R) Pentium(R) 4 CPU        "
 print_timestamps: enabled=0
 # no gdb stub
-port_e9_hack: enabled=0
+port_e9_hack: enabled=1
 private_colormap: enabled=0
 clock: sync=none, time0=local
 # no cmosimage

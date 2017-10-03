@@ -1,8 +1,6 @@
-BINDIR := $(BIN)stage1/
 include $(DEPMAKER_BEGIN)
 
 SHAREBIN := $(BINDIR)share/
-LIBBIN := $(SHAREBIN)lib/
 SHARE := ../share/
 
 SOURCES := $(wildcard *.$(EXT_C)) $(wildcard *.$(EXT_C)pp) $(wildcard *.$(EXT_ASM))
@@ -12,19 +10,19 @@ OBJECTS := $(OBJECTS:%.$(EXT_ASM)=$(BINDIR)%.$(EXT_OBJ))
 
 ASFLAGSOBJ := -O32 -f elf32 $(GASFLAGS)
 
-CCFLAGS  = -m32 -fno-stack-protector -ffreestanding -D__IS_KERNEL__ $(GCCFLAGS)  -I$(INCLUDE)share/
-CXXFLAGS = -m32 -fno-stack-protector -ffreestanding -D__IS_KERNEL__ $(GCXXFLAGS) -I$(INCLUDE)share/
+CCFLAGS  = -m32 -fno-stack-protector -ffreestanding -D__IS_KERNEL__ $(GCCFLAGS) -masm=intel
+CXXFLAGS = -m32 -fno-stack-protector -ffreestanding -D__IS_KERNEL__ $(GCXXFLAGS) -masm=intel
 LDFLAGS	:= -T link.ld -ffreestanding -nostdlib -nostartfiles -nodefaultlibs -lgcc -static $(GLDFLAGS)
 
 all: $(BINDIR)stage1.bin
 
-$(BINDIR)stage1.bin: $(LIBBIN)$(LIBK) $(OBJECTS)
-	$(CXX32) $(LDFLAGS) $(OBJECTS) -L$(LIBBIN) -l$(LIBK_LD) -static -o $(BINDIR)stage1.bin
+$(BINDIR)stage1.bin: libs $(OBJECTS)
+	$(CXX32) $(LDFLAGS) $(OBJECTS) -L$(SHAREBIN)libc/ -L$(SHAREBIN)libk/ -l:$(LIBK) -l:$(LIBC) -static -o $(BINDIR)stage1.bin
 
 FORCE: ;
 
-$(LIBBIN)$(LIBK): FORCE
-	@$(MAKE) -C ../share/lib/ BITS=32 BINDIR=$(LIBBIN)
+libs: FORCE
+	@$(MAKE) -C ../share/ BITS=32 BINDIR=$(SHAREBIN)
 
 $(BINDIR)%.$(EXT_OBJ): %.$(EXT_ASM)
 	$(AS) $(ASFLAGSOBJ) $< -o $@

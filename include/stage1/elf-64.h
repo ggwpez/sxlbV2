@@ -1,6 +1,6 @@
 #pragma once
 #include <stdint.h>
-#include "lib/defines.h"
+#include "defines.h"
 
 typedef enum elf_prog_type
 {
@@ -66,10 +66,8 @@ typedef struct elf64_prog_hdr
 	uint64_t align;
 } elf64_prog_hdr_t;
 
-C_BEGIN
 // elf_status_t check_header(elf64_hdr_t*);
 uint32_t load_elf(void*, elf_status_t*);
-C_END
 
-_Static_assert(sizeof(elf64_prog_hdr_t) == 56, "elf64_prog_hdr_t wrong size");
-_Static_assert(sizeof(elf64_hdr_t) == 64, "elf64_hdr_t wrong size");
+static_assert(sizeof(elf64_prog_hdr_t) == 56, "elf64_prog_hdr_t wrong size");
+static_assert(sizeof(elf64_hdr_t) == 64, "elf64_hdr_t wrong size");

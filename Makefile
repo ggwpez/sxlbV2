@@ -8,9 +8,10 @@ INCLUDE := $(PWD)include/
 export BIN
 export INCLUDE
 
-STAGE1_BIN := $(BIN)isodir/boot/stage1.bin
-STAGE2_BIN := $(BIN)isodir/boot/stage2.bin
-GRUB_CFG   := $(BIN)isodir/boot/grub/grub.cfg
+ISODIR := $(BIN)isodir/
+STAGE1_BIN := $(ISODIR)boot/stage1.bin
+STAGE2_BIN := $(ISODIR)boot/stage2.bin
+GRUB_CFG   := $(ISODIR)boot/grub/grub.cfg
 BUILD_NUMBER_FILE := $(CFG)build_number.md
 
 ISO := $(BIN)sxlbV2.iso
@@ -25,7 +26,7 @@ OPTI := -O0
 ERRFLAGS := -Wextra -Wpedantic -Wall -Werror
 DBGFLAGS := -g3 -ggdb3
 export LIBK = libk.a
-export LIBK_LD = k
+export LIBC = libc.a
 export EXT_OBJ = o
 export EXT_C = c
 export EXT_CPP = cpp
@@ -34,19 +35,20 @@ export EXT_DEP = d
 export EXT_DEP2 = Td
 export DEPMAKER_BEGIN = $(PWD)src/dep_begin.mk
 export DEPMAKER_END = $(PWD)src/dep_end.mk
+export INCLUDES = -I$(INCLUDE) -I$(INCLUDE)share/ -I$(INCLUDE)share/libk/ -I$(INCLUDE)share/libc/
 export DEPFLAGS = -MT $$@ -MMD -MP -MF $$(DEPDIR)$$*.$(EXT_DEP2)
 export PCOMPILE = mv -f $$(DEPDIR)$$*.$(EXT_DEP2) $$(DEPDIR)$$*.$(EXT_DEP) && touch $$@
-export GCCFLAGS = -fleading-underscore $(OPTI) -std=c11 $(DBGFLAGS) $(ERRFLAGS) -I$(INCLUDE) $(DEPFLAGS)
-export GCXXFLAGS = -fleading-underscore $(OPTI) -std=c++11 -fno-exceptions -fno-rtti $(DBGFLAGS) $(ERRFLAGS) -I$(INCLUDE) $(DEPFLAGS)
+export GCCFLAGS = -fleading-underscore $(OPTI) -std=c11 $(DBGFLAGS) $(ERRFLAGS) $(INCLUDES) $(DEPFLAGS)
+export GCXXFLAGS = -fleading-underscore $(OPTI) -std=c++11 -fno-exceptions -fno-rtti $(DBGFLAGS) $(ERRFLAGS) $(INCLUDES) $(DEPFLAGS)
 export GASFLAGS = -F dwarf -g -w+orphan-labels
-export GLDFLAGS = $(DBGFLAGS)
+export GLDFLAGS = $(DBGFLAGS) $(OPTI)
 
 QEMUFLAGS := -hda $(ISO) -d cpu_reset -no-reboot
 
 all: $(ISO) | build_number.target
 
 $(ISO): $(STAGE1_BIN) $(STAGE2_BIN) $(GRUB_CFG)
-	grub-mkrescue -o $(ISO) $(BIN)isodir
+	grub-mkrescue -o $(ISO) $(ISODIR)
 
 $(GRUB_CFG): $(CFG)grub.cfg
 	@mkdir -p $(dir $@)
@@ -63,10 +65,10 @@ $(STAGE2_BIN): $(BIN)stage2/stage2.bin
 FORCE: ;
 
 $(BIN)stage1/stage1.bin: FORCE
-	@$(MAKE) -C src/
+	@$(MAKE) -C src/ BINDIR=$(BIN)
 
 $(BIN)stage2/stage2.bin: FORCE
-	@$(MAKE) -C src/
+	@$(MAKE) -C src/ BINDIR=$(BIN)
 
 bochs: all
 	bochs -q -f $(CFG)bochsrc

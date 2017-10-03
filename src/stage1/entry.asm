@@ -1,22 +1,21 @@
 %include "multiboot2.asm"
 
-[global _start]
-[extern _lmain]
-[global _kernel_start]
-[global _kernel_end]
+[global _stage1_entry]
+[extern _stage1_main]
 
 [section .text]
 
-_start:
+_stage1_entry:
 	cli
-    mov esp, 0x200000
+	mov esp, 0x400000
 
-    push eax
-    push ebx
+	push eax
+	push ebx
 
-    call _lmain
+	call _stage1_main
 
-    add esp, 8
+	add esp, 8
 
-    cli ; falls der Kernel bis hier her kommt, CPU anhalten
-    hlt
+	cli ; falls der Kernel bis hier her kommt, CPU anhalten
+	hlt
+	jmp $
