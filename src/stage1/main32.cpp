@@ -1,6 +1,6 @@
 #include "kspace.h"
 #include <stdint.h>
-#include "stage1/multiboot.h"
+#include "share/multiboot.h"
 #include "stage1/gdt-32.h"
 #include "libk/cpuid.hpp"
 #include "libc/abort.hpp"
@@ -9,8 +9,10 @@
 #include "libk/port.hpp"
 #include "libk/pml4.hpp"
 #include "log.hpp"
+#include "empty_idt.hpp"
+#include "stage_pass.hpp"
 
-extern "C" void stage1_main(void const* mbi, unsigned magic);
+extern "C" void stage1_main(void const* mbi, unsigned magic) __attribute__((noreturn));
 
 void stage1_main(void const* mbi, unsigned magic)
 {
@@ -18,8 +20,7 @@ void stage1_main(void const* mbi, unsigned magic)
 	vga::init();
 	vga::clear();
 
-	logl("[stage1] at 0x%X-0x%X", &stage1_low, &stage1_high);
-	logl("[stage1] is now stable", 3);
+	logl("stage1 now stable at 0x%P-0x%P size 0x%P", &stage1_low, &stage1_high, &stage1_high -&stage1_low);
 
 	if (! system::get_config(system::CPU_CONFIG_OP::CPUID_SUPPORTED))
 		abort("CPUID not supported");
@@ -31,9 +32,32 @@ void stage1_main(void const* mbi, unsigned magic)
 		abort("MSR not supported, will not be able to enter 64 bit mode");
 
 	gdt_ptr* gdt = init_gdt();
-	logl("GDT initialized at 0x%p", gdt);
-	uint32_t entry = init(mbi, magic);
-	paging::init((char*)0x80000, uint32_t(gdt), entry);
+	/*uint32_t entry =*/ init(mbi, magic);
+	// Disable IRQs and load empty IDT
+	idt::load_empty_idt();
+	// Load GDT
+	asmv("lgdt [eax]" :: "a"(gdt));
+	logl("GDT loaded at 0x%P", gdt);
 
+	paging::init((char*)0x80000);
+
+	// Flush code segment with far jump and reset other segments
+	asmv("jmp 0x8:.+7"		asml
+		 "nop"				asml
+		 "mov ax, 0x10"		asml
+		 "mov ds, ax"		asml
+		 "mov es, ax"		asml
+		 "mov fs, ax"		asml
+		 "mov gs, ax"		asml
+		 "mov ss, ax");
+
+	// Jump in 64 bit stage2 kernel (spooky)
+	{
+		stage_pass_t pass = { BRIDGE_MAGIC, vga::get_tm(), mbi };
+
+		asmv("mov esp, 0x600000"	asml
+			 "sub esp, 24"			asml
+			 "call 0x200000" :: "a"(&pass));
+	}
 	while (1);
 }

@@ -5,7 +5,7 @@
 
 namespace paging
 {
-	void init(char* free_space, uint32_t gdt, uint32_t lm_entry);
+	void init(char* free_space);
 
 	union pml4e_t;
 	union pdpe_t;

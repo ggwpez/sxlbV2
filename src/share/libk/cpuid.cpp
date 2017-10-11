@@ -109,6 +109,8 @@ namespace system
 			case 4:
 				__asm__ __volatile__("mov %0, %%cr4": "=r"(out));
 				break;
+			default:
+				break;
 		}
 
 		return out;
@@ -134,12 +136,14 @@ namespace system
 			case 4:
 				__asm__ __volatile__("mov %%cr4, %0":: "r"(value)); // write cr4
 				break;
+			default:
+				break;
 		}
 	}
 
-	uint64_t rdtsc()
+	cpu_word_t rdtsc()
 	{
-		uint64_t ret;
+		cpu_word_t ret;
 #if __64__
 		asm volatile("rdtsc" : "=A"(ret));
 #elif __32__
@@ -150,9 +154,9 @@ namespace system
 		return ret;
 	}
 
-	uint64_t get_msr(uint32_t id)
+	cpu_word_t get_msr(uint32_t id)
 	{
-		uint64_t ret;
+		cpu_word_t ret;
 #if __64__
 		asm volatile("rdmsr" : "=A"(ret) : "c"(id));
 #elif __32__

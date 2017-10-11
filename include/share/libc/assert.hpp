@@ -1,9 +1,10 @@
 #pragma once
 
 #include "../defines.h"
+#include "abort.hpp"
 
-#define assert(exp) __assert((exp) ? 1 : 0, __FILE__, __LINE__);
+#define assert(exp) ((exp) ? (void)0 : abort("ASSERTION FAILURE"))
 
 C_BEGIN
-	void __assert(int, char __const*, int);
+	void _assert(int);
 C_END

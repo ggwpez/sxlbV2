@@ -1,26 +1,30 @@
 #include <stdint.h>
+#include "version.hpp"
 #include "log.hpp"
 #include "vga.hpp"
 #include "textmode.hpp"
+#include "stage_pass.hpp"
+#include "cpuid.hpp"
+#include "libc/assert.hpp"
+#include "mem/memory.hpp"
 
-extern "C" void stage2_main(uint32_t args_start, vga::tm_t tm);
+extern "C" void stage2_main() __attribute__((noreturn));
 
-// Can there be a better way to start a kernel than this beauty	?
-template<typename T>
-constexpr T const& arg_cast(T const& arg)
+void stage2_main()
 {
-	return reinterpret_cast<T const&>(*(reinterpret_cast<char const*>(&arg) +20));
-}
+	stage_pass_t* cfg;
+	{
+		register stage_pass_t* tmp asm("eax");
+		cfg = tmp;
+	}
 
-void stage2_main(uint32_t magic, vga::tm_t tm)
-{
-	magic = arg_cast(magic);
-	vga::tm_t cpy = arg_cast(tm);
+	if (cfg->magic != BRIDGE_MAGIC)
+		asm("hlt");
+	vga::set_tm(cfg->txt);
 
-	vga::init();
-	// Just pretend we are doing some fancy magic number checking
-	logl("Magic '0x%X' is %s\n", magic, (magic == STAGE2_MAGIC) ? "OK" : "INVALID");
-	//logl("tm: ", cpy.vid);
+	logl("stage2 is now stable 0x%P from 0x%P-0x%P size 0x%llu", STAGE2_VMA, &stage2_low, &stage2_high, &stage2_high -&stage2_low);
+
+	memory::init(cfg->mbi);
 
 	while (1);
 }

@@ -5,18 +5,19 @@
 
 namespace vga
 {
+	// Careful with the memory design, this structure is shared between 32 and 64 mode
 	struct tm_t
 	{
 		uint8_t w, h;
 		uint8_t x, y;
-		uint16_t* vid;
+		uint64_t vid __attribute__((aligned(8)));
 
 		enum class bc_t : uint8_t;
 		enum class fc_t	: uint8_t;
 
 		tm_t() = default;
 		tm_t(uint8_t w, uint8_t h, bc_t bc, fc_t fc, uint16_t* vid)
-			: w(w), h(h), x(0), y(0), vid(vid), clr(0), old_pos(0)
+			: w(w), h(h), x(0), y(0), vid((uint64_t)vid), clr(0), old_pos(0)
 		{
 			ctrl_set_bc(bc);
 			ctrl_set_fc(fc);
@@ -29,7 +30,7 @@ namespace vga
 
 		char putchar(char const __c, uint16_t __width)
 		{
-			vid[get_index()] = (((uint16_t)clr << 8) | (uint16_t)__c);
+			((uint16_t*)vid)[get_index()] = (((uint16_t)clr << 8) | (uint16_t)__c);
 			ctrl_inc_x(__width);
 
 			return __c;
@@ -85,10 +86,10 @@ namespace vga
 		void ctrl_scroll(int16_t const o = 1)
 		{
 			(void)o;
-			memcpy(vid, vid +w, 2 *w *(h -1));
+			memcpy((void*)vid, ((uint16_t*)vid) +w, 2 *w *(h -1));
 
 			for (int i = 0; i < w *2; i += 2)
-				*(vid + i +(((h -1)* w) << 1)) = ' ';
+				*(((uint16_t*)vid) + i +(((h -1)* w) << 1)) = ' ';
 
 			if (y)
 				--y;
@@ -104,7 +105,7 @@ namespace vga
 			ctrl_reset_pos();
 
 			for (uint16_t i(0); i < w *h; ++i)
-				vid[i] = (((uint16_t)clr << 8) | (uint16_t)' ');
+				((uint16_t*)vid)[i] = (((uint16_t)clr << 8) | (uint16_t)' ');
 		}
 
 		enum class bc_t : uint8_t
@@ -151,5 +152,7 @@ namespace vga
 
 		uint8_t clr;
 		uint16_t old_pos;
-	};
+	} __attribute__((packed,aligned(8)));
 }
+
+static_assert(sizeof(vga::tm_t) == 3 *8, "Sizeof error");

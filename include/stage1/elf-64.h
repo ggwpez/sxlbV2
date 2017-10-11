@@ -2,7 +2,7 @@
 #include <stdint.h>
 #include "defines.h"
 
-typedef enum elf_prog_type
+enum elf_prog_type_t : uint32_t
 {
 	ELF_P_INVALID     = 0,
 	ELF_P_LOAD        = 1,
@@ -16,7 +16,7 @@ typedef enum elf_prog_type
 	ELF_P_OS_HI       = 0X6FFFFFFF,
 	ELF_P_CPU_LOW     = 0X70000000,
 	ELF_P_CPU_HI      = 0X7FFFFFFF
-} elf_prog_type_t;
+};
 
 typedef enum elf_status
 {
@@ -64,10 +64,21 @@ typedef struct elf64_prog_hdr
 	uint64_t size;
 	uint64_t mem_s;
 	uint64_t align;
+
+	/*elf_prog_type_t name;
+	elf_prog_type_t type;
+	uint64_t flags;
+	uint64_t addr;
+	uint64_t off;
+	uint64_t size;
+	uint32_t link;
+	uint32_t info;
+	uint64_t alignment;
+	uint64_t entsize;*/
 } elf64_prog_hdr_t;
 
 // elf_status_t check_header(elf64_hdr_t*);
 uint32_t load_elf(void*, elf_status_t*);
 
-static_assert(sizeof(elf64_prog_hdr_t) == 56, "elf64_prog_hdr_t wrong size");
 static_assert(sizeof(elf64_hdr_t) == 64, "elf64_hdr_t wrong size");
+static_assert(sizeof(elf64_prog_hdr_t) == 56, "elf64_prog_hdr_t wrong size");

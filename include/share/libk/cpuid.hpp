@@ -124,7 +124,7 @@ namespace system
 	cpu_word_t get_creg(uint8_t number);
 	void set_creg(uint8_t number, cpu_word_t value);
 
-	uint64_t rdtsc();
-	uint64_t get_msr(uint32_t id);
+	cpu_word_t rdtsc();
+	cpu_word_t get_msr(uint32_t id);
 	void set_msr(uint32_t id, uint64_t value);
 }

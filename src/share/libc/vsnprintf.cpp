@@ -15,7 +15,6 @@ static inline size_t bufcpy(char* __dst, char const* __src)
 	return l;
 }
 
-typedef int promo_t;
 int vsnprintf(char* out, size_t n, const char* fmt, va_list arg)
 {
 	char buffer[64]; // Larger is not needed at the moment
@@ -28,6 +27,19 @@ int vsnprintf(char* out, size_t n, const char* fmt, va_list arg)
 			case '%':
 				switch (*(++fmt))
 				{
+#if __64__
+					case 'l':
+					{
+						if (*(++fmt) == 'l' && *(++fmt) == 'u')
+						{
+							__toa<uint64_t>(reinterpret_cast<uint64_t>(va_arg(arg, uint64_t)), buffer, 10);
+							i += bufcpy(out +i, buffer);
+						}
+						else
+							// FIXME
+							i += bufcpy(out +i, "l%%");
+					} break;
+#endif
 					case 'u':
 						__toa<unsigned>(va_arg(arg, unsigned), buffer);
 						i += bufcpy(out +i, buffer);
@@ -45,16 +57,21 @@ int vsnprintf(char* out, size_t n, const char* fmt, va_list arg)
 						i += bufcpy(out +i, buffer);
 						break;
 					case 'p':
-						__toa<cpu_word_t>(va_arg(arg, cpu_word_t), buffer, 16, true);
+						__toa<cpu_word_t>(reinterpret_cast<cpu_word_t>(va_arg(arg, void*)), buffer, 16, false);
+						i += bufcpy(out +i, buffer);
+						break;
+					case 'P':
+						__toa<cpu_word_t>(reinterpret_cast<cpu_word_t>(va_arg(arg, void*)), buffer, 16, true);
 						i += bufcpy(out +i, buffer);
 						break;
 					case 's':
 					{
-						char const* str = va_arg(arg, char*);
+						char* str = va_arg(arg, char*);
 						i += bufcpy(out +i, str);
 					} break;
 					case 'c':
-						out[i] = (char)(va_arg(arg, promo_t));
+						// char to int promotion
+						out[i] = (char)(va_arg(arg, int));
 						i++;
 						break;
 					case '%':
@@ -73,6 +90,7 @@ int vsnprintf(char* out, size_t n, const char* fmt, va_list arg)
 					break;
 			}
 	}
+	out[i] = 0;
 
 	return i;
 }

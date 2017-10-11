@@ -23,8 +23,12 @@ export CXX64 = x86_64-elf-g++
 export AS    = nasm
 
 OPTI := -O0
-ERRFLAGS := -Wextra -Wpedantic -Wall -Werror
-DBGFLAGS := -g3 -ggdb3
+GENERALFLAGS := -fleading-underscore $(OPTI) -pipe -mno-red-zone -masm=intel -mno-sse -mno-sse2 -mno-sse3 -mno-ssse3 -mno-sse4.1 -mno-sse4.2 -mno-sse4 -mno-avx -mno-aes -mno-pclmul -mno-sse4a -mno-fma4 -mno-xop -mno-lwp -mno-3dnow -mno-popcnt -mno-abm
+ERRFLAGS := -Wextra -Wpedantic -Wall -Werror -Wcast-align -Wdisabled-optimization -Wfloat-equal -Wformat -Wformat=2 -Wformat-nonliteral -Wformat-security  -Wformat-y2k -Wimport -Winit-self -Winline -Winvalid-pch  -Wlong-long -Wmissing-braces -Wmissing-field-initializers -Wmissing-format-attribute  -Wmissing-include-dirs -Wmissing-noreturn -Wparentheses -Wpointer-arith -Wredundant-decls -Wreturn-type -Wsequence-point -Wsign-compare -Wstack-protector -Wstrict-aliasing -Wstrict-aliasing=2 -Wswitch -Wswitch-default -Wswitch-enum -Wtrigraphs -Wuninitialized -Wunknown-pragmas -Wunreachable-code -Wunused -Wunused-function -Wunused-label -Wunused-parameter -Wunused-value -Wunused-variable -Wvariadic-macros -Wvolatile-register-var -Wwrite-strings
+# -Wcast-qual
+DBGFLAGS :=
+# -g3 -ggdb3
+export INCLUDE
 export LIBK = libk.a
 export LIBC = libc.a
 export EXT_OBJ = o
@@ -38,10 +42,10 @@ export DEPMAKER_END = $(PWD)src/dep_end.mk
 export INCLUDES = -I$(INCLUDE) -I$(INCLUDE)share/ -I$(INCLUDE)share/libk/ -I$(INCLUDE)share/libc/
 export DEPFLAGS = -MT $$@ -MMD -MP -MF $$(DEPDIR)$$*.$(EXT_DEP2)
 export PCOMPILE = mv -f $$(DEPDIR)$$*.$(EXT_DEP2) $$(DEPDIR)$$*.$(EXT_DEP) && touch $$@
-export GCCFLAGS = -fleading-underscore $(OPTI) -std=c11 $(DBGFLAGS) $(ERRFLAGS) $(INCLUDES) $(DEPFLAGS)
-export GCXXFLAGS = -fleading-underscore $(OPTI) -std=c++11 -fno-exceptions -fno-rtti $(DBGFLAGS) $(ERRFLAGS) $(INCLUDES) $(DEPFLAGS)
+export GCCFLAGS = $(GENERALFLAGS) -std=c11 $(DBGFLAGS) $(ERRFLAGS) $(INCLUDES) $(DEPFLAGS) $(BUILD_NUMBER_FLAGS)
+export GCXXFLAGS =  $(GENERALFLAGS) -std=c++11 -fno-exceptions -fno-rtti $(DBGFLAGS) $(ERRFLAGS) $(INCLUDES) $(DEPFLAGS) $(BUILD_NUMBER_FLAGS)
 export GASFLAGS = -F dwarf -g -w+orphan-labels
-export GLDFLAGS = $(DBGFLAGS) $(OPTI)
+export GLDFLAGS = $(DBGFLAGS) $(OPTI) -z max-page-size=0x1000
 
 QEMUFLAGS := -hda $(ISO) -d cpu_reset -no-reboot
 

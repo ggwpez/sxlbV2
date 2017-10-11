@@ -1,7 +1,8 @@
 # Create an auto-incrementing build number.
 
-BUILD_NUMBER_LDFLAGS := -defsym __BUILD_DATE=$$(date +'%Y%m%d')
-BUILD_NUMBER_LDFLAGS += -defsym __BUILD_NUMBER=$$(cat $(BUILD_NUMBER_FILE))
+BUILD_NUMBER := $(shell cat $(BUILD_NUMBER_FILE))
+
+BUILD_NUMBER_FLAGS += -D__BUILD_NUMBER=$(BUILD_NUMBER)
 
 build_number.target:
 	@if ! test -f $(BUILD_NUMBER_FILE); then echo 0 > $(BUILD_NUMBER_FILE); fi

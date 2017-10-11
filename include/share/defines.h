@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdint.h>
+#include "addresses.h"
 
 extern uint32_t stage1_low;
 extern uint32_t stage1_high;
@@ -17,12 +18,34 @@ extern uint32_t stage2_high;
 	(0##x >> 12 & 0100) | \
 	(0##x >> 14 & 0200))
 
+#define S_1KiB (uint64_t(1) << 10)
+#define S_1MiB (uint64_t(1) << 20)
+#define S_1GiB (uint64_t(1) << 30)
+
+#define asmv(x) __asm__ __volatile__(x)
+#define asml "\t\n"
+
+#define PAGE_SIZE_BITS 12
+#define PAGE_SIZE (cpu_word_t(1) << PAGE_SIZE_BITS)
+
+#define DEBUG 1
+// Extendet debugging, this makes all things rly slow
+#define DEBUG_EXT 1
+
+// Stage2 at -2GiB aka 0xFFFFFFFF80000000
+#define STAGE2_VMA (uint64_t(0) -(2* S_1GiB))
+
 // :DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD
-#define STAGE2_MAGIC uint32_t(0xDDDDDDDD)
+#define BRIDGE_MAGIC uint32_t(0xDDDDDDDD)
 
 #define BIT(x) (uint64_t(1) << x)
 
-#define BOCHS_BRK __asm__("xchgw %bx, %bx");
+#define BOCHS_BRK __asm__("xchg bx, bx");
+
+#define UNREACHABLE abort("Reached unreachable code");
+
+#define ROUND_UP(n, s) ((n) + ((s) -(n) %(s)))
+#define ROUND_DW(n, s) ((n) -((n) %(s)))
 
 #ifdef __cplusplus
 	#define C_BEGIN extern "C" {
