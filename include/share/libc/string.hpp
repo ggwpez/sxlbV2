@@ -1,7 +1,7 @@
 #pragma once
 
 #include <stddef.h>
-#include "../defines.h"
+#include "../defines.hpp"
 
 C_BEGIN
 	void* memcpy(void*, void __const*, size_t);

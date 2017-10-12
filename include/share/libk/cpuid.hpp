@@ -1,6 +1,6 @@
 #pragma once
 #include <stdint.h>
-#include "defines.h"
+#include "defines.hpp"
 
 namespace system
 {

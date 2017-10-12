@@ -39,7 +39,7 @@ void stage1_main(void const* mbi, unsigned magic)
 	asmv("lgdt [eax]" :: "a"(gdt));
 	logl("GDT loaded at 0x%P", gdt);
 
-	paging::init((char*)0x80000);
+	paging::init((char*)STAGE1_PML4_PHY);
 
 	// Flush code segment with far jump and reset other segments
 	asmv("jmp 0x8:.+7"		asml

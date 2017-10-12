@@ -8,7 +8,7 @@ class mbi_iterator
 public:
 	mbi_iterator(void const* mbi);
 
-	const multiboot_tag* operator *() const;
+	multiboot_tag const* operator *() const;
 	mbi_iterator& operator ++(int);		// post
 
 private:

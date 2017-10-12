@@ -2,7 +2,7 @@
 #include <stdint.h>
 #include "libk/port.hpp"
 #include "libk/log.hpp"
-#include "defines.h"
+#include "defines.hpp"
 
 static struct __attribute__((packed, aligned(4)))
 {

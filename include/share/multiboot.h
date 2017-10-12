@@ -415,7 +415,7 @@ struct multiboot_tag_efi_mmap
 };
 
 #include <stdint.h>
-#include "defines.h"
+#include "defines.hpp"
 
 C_BEGIN
 uint32_t init(void const* ptr, unsigned magic);

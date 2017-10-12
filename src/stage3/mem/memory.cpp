@@ -1,4 +1,4 @@
-#include "defines.h"
+#include "defines.hpp"
 #include "mem/memory.hpp"
 #include "libk/mbi_iterator.hpp"
 #include "mem/page_alloc.hpp"
@@ -24,7 +24,7 @@ namespace memory
 				if (tag->type == MULTIBOOT_TAG_TYPE_BASIC_MEMINFO)
 					// We just add 640 KiB, bc that is the maximum value for mem_lower
 					// also this only needs to be an upper bound
-					mem_hi = (((multiboot_tag_basic_meminfo const*)tag)->mem_upper *1024) +S_1KiB *640;
+					mem_hi = (((multiboot_tag_basic_meminfo const*)tag)->mem_upper *1024) +KiB(640);
 				else if (tag->type == MULTIBOOT_TAG_TYPE_MMAP)
 					mmap = (multiboot_tag_mmap const*)tag;
 				else
@@ -49,7 +49,6 @@ namespace memory
 #define MULTIBOOT_MEMORY_NVS                    4
 #define MULTIBOOT_MEMORY_BADRAM                 5*/
 
-			// FIXME ROUND_UP round up even when its a multiple
 			if (entry->type == MULTIBOOT_MEMORY_AVAILABLE)
 			{
 				// TODO the rounding of mem_lo and mem_hi may cause a too high value of len here
@@ -63,7 +62,8 @@ namespace memory
 		}
 
 		logl("Memory found 0x%P aka %uKiB usable %uKiB", mem_hi, mem_hi /1024, usable /1024);
-		pages.dump();
+
+
 	}
 
 	void* kmalloc(size_t)

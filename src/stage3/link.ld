@@ -1,13 +1,13 @@
 /* The bootloader will look at this image and start execution at the symbol
    designated as the entry point. */
-ENTRY(_stage2_main)
+ENTRY(_stage3_main)
 
 /* Tell where the various sections of the object files will be put in the final
    kernel image. */
 SECTIONS
 {
-	. = 0x200000;
-	_stage2_low = .;
+	. = 0xFFFFFFFF80000000;
+	_stage3_low = .;
 
 	/* First put the multiboot header, as it is required to be put very early
 	 early in the image or the bootloader won't recognize the file format.
@@ -36,7 +36,7 @@ SECTIONS
 		*(COMMON)
 		*(.bss)
 	}
-	_stage2_high = .;
+	_stage3_high = .;
 	/* The compiler may produce other sections, by default it will put them in
 		a segment with the same name. Simply add stuff here as needed. */
 }

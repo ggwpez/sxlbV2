@@ -1,7 +1,7 @@
 #pragma once
 
-#include "defines.h"
-#include "pflags.hpp"
+#include "defines.hpp"
+#include "pml4_flags.hpp"
 
 namespace paging
 {

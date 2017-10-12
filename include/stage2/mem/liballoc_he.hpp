@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../defines.h"
+#include "../defines.hpp"
 
 C_BEGIN
 	int liballoc_lock();

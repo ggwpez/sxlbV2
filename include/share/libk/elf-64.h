@@ -1,6 +1,6 @@
 #pragma once
 #include <stdint.h>
-#include "defines.h"
+#include "defines.hpp"
 
 enum elf_prog_type_t : uint32_t
 {
@@ -18,7 +18,7 @@ enum elf_prog_type_t : uint32_t
 	ELF_P_CPU_HI      = 0X7FFFFFFF
 };
 
-typedef enum elf_status
+typedef enum elf_status : uint32_t
 {
 	ELF_ERR_UNKNOWN         = 0,
 	ELF_ERR_OK,
@@ -78,7 +78,7 @@ typedef struct elf64_prog_hdr
 } elf64_prog_hdr_t;
 
 // elf_status_t check_header(elf64_hdr_t*);
-uint32_t load_elf(void*, elf_status_t*);
+cpu_word_t load_elf(void*, elf_status_t*);
 
 static_assert(sizeof(elf64_hdr_t) == 64, "elf64_hdr_t wrong size");
 static_assert(sizeof(elf64_prog_hdr_t) == 56, "elf64_prog_hdr_t wrong size");

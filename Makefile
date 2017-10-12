@@ -11,6 +11,7 @@ export INCLUDE
 ISODIR := $(BIN)isodir/
 STAGE1_BIN := $(ISODIR)boot/stage1.bin
 STAGE2_BIN := $(ISODIR)boot/stage2.bin
+STAGE3_BIN := $(ISODIR)boot/stage3.bin
 GRUB_CFG   := $(ISODIR)boot/grub/grub.cfg
 BUILD_NUMBER_FILE := $(CFG)build_number.md
 
@@ -51,7 +52,7 @@ QEMUFLAGS := -hda $(ISO) -d cpu_reset -no-reboot
 
 all: $(ISO) | build_number.target
 
-$(ISO): $(STAGE1_BIN) $(STAGE2_BIN) $(GRUB_CFG)
+$(ISO): $(STAGE1_BIN) $(STAGE2_BIN) $(STAGE3_BIN) $(GRUB_CFG)
 	grub-mkrescue -o $(ISO) $(ISODIR)
 
 $(GRUB_CFG): $(CFG)grub.cfg
@@ -66,12 +67,19 @@ $(STAGE2_BIN): $(BIN)stage2/stage2.bin
 	@mkdir -p $(dir $@)
 	@cp $< $@
 
+$(STAGE3_BIN): $(BIN)stage3/stage3.bin
+	@mkdir -p $(dir $@)
+	@cp $< $@
+
 FORCE: ;
 
 $(BIN)stage1/stage1.bin: FORCE
 	@$(MAKE) -C src/ BINDIR=$(BIN)
 
 $(BIN)stage2/stage2.bin: FORCE
+	@$(MAKE) -C src/ BINDIR=$(BIN)
+
+$(BIN)stage3/stage3.bin: FORCE
 	@$(MAKE) -C src/ BINDIR=$(BIN)
 
 bochs: all

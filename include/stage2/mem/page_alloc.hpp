@@ -1,7 +1,7 @@
 #pragma once
 
 #include <stddef.h>
-#include "defines.h"
+#include "defines.hpp"
 #include "abort.hpp"
 #include "libc/string.hpp"
 #include "libk/log.hpp"
@@ -27,7 +27,7 @@ public:
 		return ROUND_UP(((mem_size_to_manage >> PAGE_SIZE_BITS) /64) *8, 8);
 	}
 
-	void dump(size_t splitter = S_1MiB);
+	void dump(size_t splitter = MiB(1));
 
 private:
 	void set_entry(void* page, int);

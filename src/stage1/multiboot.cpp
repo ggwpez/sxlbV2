@@ -1,6 +1,7 @@
 #include "kspace.h"
-#include "share/libk/mbi_iterator.hpp"
-#include "stage1/elf-64.h"
+#include "libc/string.hpp"
+#include "libk/mbi_iterator.hpp"
+#include "libk/elf-64.h"
 #include "libc/assert.hpp"
 #include "log.hpp"
 
@@ -31,32 +32,19 @@ uint32_t init(void const* ptr, unsigned magic)
 			case MULTIBOOT_TAG_TYPE_MODULE:
 			{
 				struct multiboot_tag_module* mod = (struct multiboot_tag_module*)tag;
-				elf_status_t status;
-				logl("Found module '%s' at 0x%X-0x%X size 0x%X",
+				logl("Module '%s' at 0x%X-0x%X size 0x%X",
 					 mod->cmdline, mod->mod_start, mod->mod_end, mod->mod_end -mod->mod_start);
+				// We need to load stage2 here
+				if (strcmp(mod->cmdline, "stage2"))
+					continue;
+
+				elf_status_t status;
 				uint32_t entry = load_elf((void*)mod->mod_start, &status);
 
 				if (status == ELF_ERR_OK)
 					elf_entry = entry;
 			} break;
-			/*case MULTIBOOT_TAG_TYPE_BASIC_MEMINFO:
-				logl("mem_lower %uKiB, mem_upper %uKiB",
-					 ((struct multiboot_tag_basic_meminfo*)tag)->mem_lower, ((struct multiboot_tag_basic_meminfo*)tag)->mem_upper);
-				break;
-			case MULTIBOOT_TAG_TYPE_MMAP:
-			{
-				multiboot_memory_map_t* mmap;
-				logl("mmap",0);
-				for (mmap = ((struct multiboot_tag_mmap*)tag)->entries;
-					 (multiboot_uint8_t*)mmap < (multiboot_uint8_t*)tag +tag->size;
-					 mmap = (multiboot_memory_map_t*)((unsigned long)mmap +((struct multiboot_tag_mmap*)tag)->entry_size))
-				{
-					logl(" base_addr 0x%X, length 0x%X, type 0x%X",
-						 (uint32_t)mmap->addr, (uint32_t)mmap->len, (uint32_t)mmap->type);
-				}
-			} break;*/
 			default:
-				//logl("Boot Tag %u", tag->type);
 				break;
 		}
 	}

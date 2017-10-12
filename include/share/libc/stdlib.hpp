@@ -1,6 +1,6 @@
 #pragma once
 
-#include "defines.h"
+#include "defines.hpp"
 
 C_BEGIN
 	char* itoa(int, char*, int = 10);
