@@ -2,7 +2,7 @@
 #include <stdint.h>
 #include "defines.hpp"
 
-namespace system
+namespace cpu
 {
 	#define NM_CR  0x1
 	#define NM_CR0 ((NM_CR << 4) | 0x0)

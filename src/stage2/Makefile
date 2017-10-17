@@ -16,12 +16,9 @@ CCFLAGS  = $(CFLAGS) $(GCCFLAGS) -I$(INCLUDE)stage2/
 CXXFLAGS = $(CFLAGS) $(GCXXFLAGS) -I$(INCLUDE)stage2/
 LDFLAGS	:= -T link.ld -ffreestanding -nostdlib -nostartfiles -nodefaultlibs -lgcc -static $(GLDFLAGS)
 
-$(shell mkdir -p $(BINDIR)mem/)
-$(shell mkdir -p $(BINDIR).d/mem/)
-
 all: $(BINDIR)stage2.bin
 
-$(BINDIR)stage2.bin: $(BINDIR)mem/ libs $(OBJECTS)
+$(BINDIR)stage2.bin: libs $(OBJECTS)
 	$(CXX64) $(LDFLAGS) $(OBJECTS) -L$(SHAREBIN)libc/ -L$(SHAREBIN)libk/ -l:$(LIBK) -l:$(LIBC) -static -o $(BINDIR)stage2.bin
 
 libs:

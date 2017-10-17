@@ -6,4 +6,4 @@
 #define STR_HELPER(x) #x
 #define STR(x) STR_HELPER(x)
 
-#define KERNEL_VERSION "sxlb V2.0.1." STR(__BUILD_NUMBER) " " __DATE__ " " __TIME__
+#define KERNEL_VERSION "sxlb V2.0.1." STR(__BUILD_NUMBER__) " build on " __DATE__ ", " __TIME__

@@ -6,7 +6,7 @@ ENTRY(_stage3_main)
    kernel image. */
 SECTIONS
 {
-	. = 0xFFFFFFFF80000000;
+	. = 0xFFFFFF8000000000;
 	_stage3_low = .;
 
 	/* First put the multiboot header, as it is required to be put very early

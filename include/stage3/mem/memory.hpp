@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stddef.h>
+#include "types.hpp"
 
 namespace memory
 {

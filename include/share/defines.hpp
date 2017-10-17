@@ -16,8 +16,10 @@
 #define BRIDGE_MAGIC uint32_t(0xDDDDDDDD)
 
 #define BOCHS_BRK __asm__("xchg bx, bx");
-#define cli asmv("cli")
-#define sti asmv("sti")
+#define cli asmv("cli");
+#define sti asmv("sti");
+
+#define ATT_PACKED __attribute__((packed))
 
 #define UNREACHABLE abort("Reached unreachable code");
 

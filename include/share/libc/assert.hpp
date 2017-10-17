@@ -4,7 +4,7 @@
 #include "abort.hpp"
 
 #if DEBUG
-	#define assert(exp) ((exp) ? (void)0 : abortf("ASSERTION FAILURE\n%s", #exp))
+	#define assert(exp) ((exp) ? (void)0 : abortf("ASSERTION FAILURE '%s' was NULL", #exp))
 #else
 	#define assert(exp) ((exp) ? (void)0 : abort("ASSERTION FAILURE\nEnable DEBUG for more information"))
 #endif

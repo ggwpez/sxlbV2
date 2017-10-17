@@ -32,12 +32,12 @@ uint32_t init(void const* ptr, unsigned magic)
 			case MULTIBOOT_TAG_TYPE_MODULE:
 			{
 				struct multiboot_tag_module* mod = (struct multiboot_tag_module*)tag;
-				logl("Module '%s' at 0x%X-0x%X size 0x%X",
-					 mod->cmdline, mod->mod_start, mod->mod_end, mod->mod_end -mod->mod_start);
 				// We need to load stage2 here
 				if (strcmp(mod->cmdline, "stage2"))
 					continue;
 
+				logl("Loading module '%s' at 0x%X-0x%X size 0x%X",
+					 mod->cmdline, mod->mod_start, mod->mod_end, mod->mod_end -mod->mod_start);
 				elf_status_t status;
 				uint32_t entry = load_elf((void*)mod->mod_start, &status);
 
