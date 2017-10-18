@@ -32,3 +32,6 @@ constexpr inline auto ROUND_DW(T const& v, S const& m)
 	:
 		v -(v %m);
 }
+
+#define STR_HELPER(x) #x
+#define STR(x) STR_HELPER(x)

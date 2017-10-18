@@ -3,7 +3,6 @@
 // Defined by makefile
 // #define __BUILD_NUMBER
 
-#define STR_HELPER(x) #x
-#define STR(x) STR_HELPER(x)
+#include "macros.hpp"
 
 #define KERNEL_VERSION "sxlb V2.0.1." STR(__BUILD_NUMBER__) " build on " __DATE__ ", " __TIME__

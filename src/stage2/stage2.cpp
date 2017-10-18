@@ -47,7 +47,6 @@ void stage2_main()
 
 	if (! stage3_entry)
 		abort("Could not find stage3, abort");
-	assert(stage3_entry == STAGE3_VMA);
 
 	// Jump in 64 bit stage3 kernel (spooky^2)
 	{

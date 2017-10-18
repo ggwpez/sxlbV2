@@ -51,7 +51,7 @@ cpu_word_t load_elf(void* elf, elf_status_t* status)
 		memset(dest, 0, clear_size);
 		memcpy(dest, src, copy_size);
 
-		logl("Relocating elf64 with size 0x%X from 0x%P to 0x%P", copy_size, src, dest);
+		logl("Relocating elf64 with size 0x%X from 0x%P to 0x%P entry 0x%P", copy_size, src, dest, hdr->p_entry);
 	}
 
 	if (hdr->p_entry > CPU_WORD_MAX || ! hdr->p_entry)
