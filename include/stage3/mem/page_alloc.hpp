@@ -6,21 +6,25 @@
 #include "libc/string.hpp"
 #include "libk/log.hpp"
 
+#include "page_iterator.hpp"
+
 #define PUSED 0
 #define PFREE 1
 
 class page_alloc
 {
+	using iterator_t = page_iterator<1 << PAGE_SIZE_BITS, 64>;
 public:
 	// Will not be called anyways
 	page_alloc() = default;
 	page_alloc(size_t mem_size_to_manage, void* buffer, size_t buff_size);
 
-	void* alloc_page(bool must_be_zero = false, void* phys = nullptr);
-	void* free_page(void* page);
-	void* free_page(nullptr_t) = delete;
+	// Accepting phys as parameter automatically allows me to check the alignment of phys with ! phys.invalid
+	page_ptr_t alloc_page(page_ptr_t phys = PPTR_INV);
+	page_ptr_t free_page(void* page);
+	page_ptr_t free_page(nullptr_t) = delete;
 
-	void add_mem_region(void* phys, size_t mem_size);
+	void set_mem_region(void* phys, size_t mem_size, int type);
 
 	static constexpr size_t needed_buffer_s(size_t mem_size_to_manage)
 	{
@@ -30,20 +34,19 @@ public:
 	void dump(size_t splitter = MiB(1));
 
 private:
-	void set_entry(void* page, int);
-	int get_entry(void* page);
-	void set_with_off(size_t frame, size_t off, int v);
-	int get_with_off(size_t frame, size_t off);
+	iterator_t make_it(page_ptr_t page);
+	iterator_t begin(page_ptr_t page = PPTR_MIN);
+	iterator_t end(page_ptr_t page = PPTR_MAX);
+
+	void set_entry(iterator_t const&, int);
+	int get_entry(iterator_t const&);
 
 	template<typename T>
 	inline void check_align(T val)
 	{
 		cpu_word_t ptr = (cpu_word_t)val;
 
-		if (! ptr)
-			abort("0 does not count as an aligned pointer");
-
-		if (((1 << PAGE_SIZE_BITS) -1) &ptr)
+		if (ptr %(1 << PAGE_SIZE_BITS))
 			abortf("Pointer 0x%P should be 0x%X aligned", ptr, PAGE_SIZE_BITS);
 	}
 

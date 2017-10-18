@@ -13,7 +13,7 @@ void stage2_main()
 {
 	stage_pass_t* cfg;
 	{
-		register stage_pass_t* tmp asm("eax");
+		register stage_pass_t* tmp asm("ecx");
 		cfg = tmp;
 	}
 
@@ -21,13 +21,6 @@ void stage2_main()
 	vga::set_tm(cfg->txt);
 
 	logl("stage2 is now stable 0x%P from 0x%P-0x%P size 0x%llu", STAGE2_VMA, &stage2_low, &stage2_high, &stage2_high -&stage2_low);
-
-	{
-		char* test = (char*)STAGE3_VMA;
-		logl("Trying to access 0x%P", test);
-		BOCHS_BRK
-		logl("Value: %c", *test);
-	}
 
 	mbi_iterator it(cfg->mbi);
 	multiboot_tag const* tag;
@@ -54,9 +47,15 @@ void stage2_main()
 
 	if (! stage3_entry)
 		abort("Could not find stage3, abort");
-	assert(stage3_entry == STAGE3_VMA);
 
-	asm("call rax" :: "A"(stage3_entry));
+	// Jump in 64 bit stage3 kernel (spooky^2)
+	{
+		stage_pass_t pass = { BRIDGE_MAGIC, vga::get_tm(), cfg->mbi };
+
+		__asm__ __volatile__("mov esp, 0x600000"	asml
+			 "sub esp, 24"			asml
+			 "call rax" :: "a"(stage3_entry), "c"(&pass));
+	}
 
 	while (1);
 }

@@ -12,7 +12,7 @@ extern "C"
 	uint32_t asm_CPUID_get_feature(uint8_t reg_n);
 }
 
-namespace system
+namespace cpu
 {
 	//static uint8_t buffer[64];
 

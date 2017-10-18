@@ -18,10 +18,8 @@ page_alloc::page_alloc(size_t mem_size_to_manage, void* buffer, size_t buff_size
 			   mem_size_to_manage, buffer, buff_size, needed_buffer_s(mem_size_to_manage), frame_count, page_count);
 }
 
-void* page_alloc::alloc_page(bool must_be_zero, void* phys)
+page_ptr_t page_alloc::alloc_page(page_ptr_t phys)
 {
-	void* ret = nullptr;
-
 	// Pages free?
 	if (! pages_free)
 	{
@@ -29,124 +27,120 @@ void* page_alloc::alloc_page(bool must_be_zero, void* phys)
 		for (size_t i = 0; i < frame_count; ++i)
 			assert(! frames[i]);
 #endif
-		ret = nullptr;
+		return PPTR_MIN;
 	}
-	else if (phys)
+	else if (phys.valid())
 	{
-		if (get_entry(phys) == PUSED)
+		iterator_t it = make_it(phys);
+		if (get_entry(it) == PUSED)
 			abort("Page already allocated");
 
-		set_entry(phys, PUSED);
+		set_entry(it, PUSED);
 
-		assert(pages_free);
-		--pages_free;
-		ret = phys;
+		return phys;
 	}
 	else
 	{
 		// TODO dont jump bitwise but check the whole frame against -1
-		size_t off = 1;
-		for (size_t f = 0; f < frame_count; ++f)
+		for (iterator_t it = begin(); it != end(); ++it)
 		{
-			// We skip 0[0] since it woule be the NULL page
-			for (; off < 64; ++off)
+			if (get_entry(it) == PFREE)
 			{
-				if (get_with_off(f, off) == PFREE)
-				{
-					set_with_off(f, off, PUSED);
+				set_entry(it, PUSED);
 
-					assert(pages_free);
-					--pages_free;
-					ret = (void*)((f *64 +off) << PAGE_SIZE_BITS);
-				}
+				return *it;
 			}
-
-			off = 0;
 		}
 
 		abort("(pages_free != 0) indicated the existance of a free page, but I'm unable to find one");
 	}
-
-	if (must_be_zero)
-		memset(ret, 0, 1 << PAGE_SIZE_BITS);
-	return ret;
 }
 
-void* page_alloc::free_page(void* page)
+page_ptr_t page_alloc::free_page(void* page)
 {
-	if (get_entry(page) == PFREE)
+	logl("wtf 2",0);
+
+	iterator_t it = make_it(page);
+	if (get_entry(it) == PFREE)
 		abort("Double free of memory corruption");
 
-	set_entry(page, PFREE);
-	++pages_free;
-	assert(pages_free <= page_count);
+	set_entry(it, PFREE);
+
 	return page;
 }
 
-void page_alloc::add_mem_region(void* phys, size_t mem_size)
+void page_alloc::set_mem_region(void* phys, size_t mem_size, int type)
 {
 	check_align(mem_size);
 
-	for (size_t size = 0; size < mem_size; size += (1 << PAGE_SIZE_BITS))
-	{
-		void* page = (void*)((size_t)phys +size);
-		set_entry(page, PFREE);
-
-		++pages_free;
-		//assert(pages_free <= page_count);
-		if (pages_free > page_count)
-			abortf("pages_free %u needed %u", pages_free, page_count);
-	}
+	for (iterator_t it = begin(phys); it != end(uint64_t(phys) +mem_size); ++it)
+		set_entry(it, type);
 }
 
 void page_alloc::dump(size_t splitter)
 {
-	for (size_t f = 0; f < frame_count; ++f)
+	for (iterator_t it = begin(); it != end(); ++it)
 	{
-		if (! (((f *64) << PAGE_SIZE_BITS) %splitter))
-			printf("\n0x%X\n", (f *64) << PAGE_SIZE_BITS);
+		if (! (((it.index() *64) << PAGE_SIZE_BITS) %splitter))
+			printf("\n0x%X\n", (it.index() *64) << PAGE_SIZE_BITS);
 
 		for (size_t off = 0; off < 64; ++off)
+			putchar(get_entry(it) == PFREE ? '_' : 'X');
+	}
+}
+
+page_alloc::iterator_t page_alloc::make_it(page_ptr_t page)
+{
+	size_t index, off;
+	if (page == PPTR_MAX)
+	{
+		index = frame_count -1;
+		off = page_count %64;
+	}
+	else if (page == PPTR_MIN)
+		get_ind_off(nullptr, index, off);
+	else
+		get_ind_off(page, index, off);
+
+	return iterator_t(index, off);
+}
+
+page_alloc::iterator_t page_alloc::begin(page_ptr_t page)
+{
+	return make_it(page);
+}
+
+page_alloc::iterator_t page_alloc::end(page_ptr_t page)
+{
+	return make_it(page);
+}
+
+void page_alloc::set_entry(const iterator_t& it, int v)
+{
+	if (get_entry(it) != v)
+	{
+		if (v)
+			frames[it.index()] |=  (1 << it.off());
+		else
+			frames[it.index()] &= ~(1 << it.off());
+
+		if (v == PFREE)
 		{
-			if (get_with_off(f, off) == PFREE)
-				putchar('_');
-			else
-				putchar('X');
+			pages_free++;
+			if (pages_free > page_count)
+				abortf("%u vs %u", pages_free, page_count);
+		}
+		else
+		{
+			assert(pages_free);
+			pages_free--;
 		}
 	}
 }
 
-void page_alloc::set_entry(void* page, int v)
+int page_alloc::get_entry(const iterator_t& it)
 {
-	check_align(page);
-
-	size_t find, foff;
-	get_ind_off(page, find, foff);
-	set_with_off(find, foff, v);
-	//logl("page %u index %u[%u] at 0x%P to %u", find *64 +foff, find, foff, page, v);
-}
-
-int page_alloc::get_entry(void* page)
-{
-	check_align(page);
-
-	size_t find, foff;
-	get_ind_off(page, find, foff);
-	return get_with_off(find, foff);
-}
-
-void page_alloc::set_with_off(size_t frame, size_t off, int v)
-{
-	// TODO look this up
-	if (v)
-		frames[frame] |=  (1 << off);
-	else
-		frames[frame] &= ~(1 << off);
-}
-
-int page_alloc::get_with_off(size_t frame, size_t off)
-{
-	return (frames[frame] & (1 << off)) ? 1 : 0;
+	return (frames[it.index()] & (1 << it.off())) ? 1 : 0;
 }
 
 void page_alloc::get_ind_off(void* page, size_t& index, size_t& offset)

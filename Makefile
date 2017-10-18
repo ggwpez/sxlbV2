@@ -25,7 +25,10 @@ export AS    = nasm
 
 OPTI := -O0
 GENERALFLAGS := -fleading-underscore $(OPTI) -pipe -mno-red-zone -masm=intel -mno-sse -mno-sse2 -mno-sse3 -mno-ssse3 -mno-sse4.1 -mno-sse4.2 -mno-sse4 -mno-avx -mno-aes -mno-pclmul -mno-sse4a -mno-fma4 -mno-xop -mno-lwp -mno-3dnow -mno-popcnt -mno-abm
-ERRFLAGS := -Wextra -Wpedantic -Wall -Werror -Wcast-align -Wdisabled-optimization -Wfloat-equal -Wformat -Wformat=2 -Wformat-nonliteral -Wformat-security  -Wformat-y2k -Wimport -Winit-self -Winline -Winvalid-pch  -Wlong-long -Wmissing-braces -Wmissing-field-initializers -Wmissing-format-attribute  -Wmissing-include-dirs -Wmissing-noreturn -Wparentheses -Wpointer-arith -Wredundant-decls -Wreturn-type -Wsequence-point -Wsign-compare -Wstack-protector -Wstrict-aliasing -Wstrict-aliasing=2 -Wswitch -Wswitch-default -Wswitch-enum -Wtrigraphs -Wuninitialized -Wunknown-pragmas -Wunreachable-code -Wunused -Wunused-function -Wunused-label -Wunused-parameter -Wunused-value -Wunused-variable -Wvariadic-macros -Wvolatile-register-var -Wwrite-strings
+ERRFLAGS := -Wextra -Wall -Wcast-align -Wdisabled-optimization -Wfloat-equal -Wformat -Wformat=2 -Wformat-nonliteral -Wformat-security  -Wformat-y2k -Wimport -Winit-self -Winline -Winvalid-pch -Wmissing-braces -Wmissing-field-initializers -Wmissing-format-attribute  -Wmissing-include-dirs -Wmissing-noreturn -Wparentheses -Wpointer-arith -Wredundant-decls -Wreturn-type -Wsequence-point -Wsign-compare -Wstack-protector -Wstrict-aliasing -Wstrict-aliasing=2 -Wswitch -Wswitch-default -Wswitch-enum -Wtrigraphs -Wuninitialized -Wunknown-pragmas -Wunreachable-code -Wunused -Wunused-function -Wunused-label -Wunused-parameter -Wunused-value -Wunused-variable -Wvariadic-macros -Wvolatile-register-var -Wwrite-strings
+#  -Werror
+# Wont let me do 'point{ .x = 0, .y = 0 }' I mean wtf
+#  -Wpedantic
 # -Wcast-qual
 DBGFLAGS :=
 # -g3 -ggdb3
@@ -83,7 +86,7 @@ $(BIN)stage3/stage3.bin: FORCE
 	@$(MAKE) -C src/ BINDIR=$(BIN)
 
 bochs: all
-	bochs -q -f $(CFG)bochsrc
+	bochs -q -f $(CFG)bochsrc -rc $(CFG)bochscmd
 
 qemu: qemu64
 

@@ -22,13 +22,13 @@ void stage1_main(void const* mbi, unsigned magic)
 
 	logl("stage1 now stable at 0x%P-0x%P size 0x%P", &stage1_low, &stage1_high, &stage1_high -&stage1_low);
 
-	if (! system::get_config(system::CPU_CONFIG_OP::CPUID_SUPPORTED))
+	if (! cpu::get_config(cpu::CPU_CONFIG_OP::CPUID_SUPPORTED))
 		abort("CPUID not supported");
-	if (! system::get_config(system::CPU_CONFIG_OP::CPUID_EXT_SUPPORTED))
+	if (! cpu::get_config(cpu::CPU_CONFIG_OP::CPUID_EXT_SUPPORTED))
 		abort("Extended CPUID not supported");
-	if (! system::get_config(system::CPU_CONFIG_OP::CPUID_LONG_MODE_SUPPORTED))
+	if (! cpu::get_config(cpu::CPU_CONFIG_OP::CPUID_LONG_MODE_SUPPORTED))
 		abort("Long mode (64 bit) not supported");
-	if (! system::get_config(system::CPU_CONFIG_OP::CPUID_EDX_MSR))
+	if (! cpu::get_config(cpu::CPU_CONFIG_OP::CPUID_EDX_MSR))
 		abort("MSR not supported, will not be able to enter 64 bit mode");
 
 	gdt_ptr* gdt = init_gdt();
@@ -39,7 +39,7 @@ void stage1_main(void const* mbi, unsigned magic)
 	asmv("lgdt [eax]" :: "a"(gdt));
 	logl("GDT loaded at 0x%P", gdt);
 
-	paging::init((char*)STAGE1_PML4_PHY);
+	paging::init((char*)KiB(256));
 
 	// Flush code segment with far jump and reset other segments
 	asmv("jmp 0x8:.+7"		asml
@@ -55,9 +55,9 @@ void stage1_main(void const* mbi, unsigned magic)
 	{
 		stage_pass_t pass = { BRIDGE_MAGIC, vga::get_tm(), mbi };
 
-		asmv("mov esp, 0x600000"	asml
+		__asm__ __volatile__("mov esp, 0x600000"	asml
 			 "sub esp, 24"			asml
-			 "call 0x200000" :: "a"(&pass));
+			 "call eax" :: "a"(0x200000), "c"(&pass));
 	}
 	while (1);
 }

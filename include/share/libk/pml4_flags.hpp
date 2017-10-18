@@ -1,5 +1,7 @@
 #pragma once
 
+#include "flags.hpp"
+
 #define MAKE_PFLAGS \
 	uint64_t PRESENT : 1;		/* Must be 1 to be a valid reference */ \
 	uint64_t WRITE : 1;			/* If 0, writes not allowed. */ \
@@ -25,6 +27,3 @@
 	uint64_t AVAIL_11 : 1; \
 	uint64_t AVAIL_12 : 1; \
 	uint64_t AVAIL_13 : 1;
-
-#define IGNORE(n) \
-	uint64_t : n;
