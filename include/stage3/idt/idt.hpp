@@ -1,15 +1,12 @@
 #pragma once
 
 #include "idte.hpp"
-#include "cpu_state.hpp"
+#include "idt/int_mng.hpp"
 
 #define IDT_ENTRIES 256
 
 namespace idt
 {
-	typedef cpu_state_t*(*isr_cb_t)(cpu_state_t*);
-	typedef void(*irq_cb_t)(cpu_state_t*);
-
 	void init();
 
 	void set_entry(uint8_t index, idte_t const& entry);
@@ -18,11 +15,7 @@ namespace idt
 	void irq_install();
 	idtp_t* lidt(idtp_t*);
 
-	void reg_isr(uint8_t, isr_cb_t);
-	void del_isr(uint8_t);
-
-	void reg_irq(uint8_t, irq_cb_t);
-	void del_irq(uint8_t);
+	extern int_mng interrupt_manager;
 }
 
 extern "C"

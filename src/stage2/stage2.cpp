@@ -17,7 +17,7 @@ void stage2_main()
 		cfg = tmp;
 	}
 
-	assert(cfg->magic == BRIDGE_MAGIC);
+	assert(cfg->magic == BRIDGE_1_2_MAGIC);
 	vga::set_tm(cfg->txt);
 
 	logl("stage2 is now stable 0x%P from 0x%P-0x%P size 0x%llu", STAGE2_VMA, &stage2_low, &stage2_high, &stage2_high -&stage2_low);
@@ -50,7 +50,7 @@ void stage2_main()
 
 	// Jump in 64 bit stage3 kernel (spooky^2)
 	{
-		stage_pass_t pass = { BRIDGE_MAGIC, vga::get_tm(), cfg->mbi };
+		stage_pass_t pass = { BRIDGE_2_3_MAGIC, vga::get_tm(), cfg->mbi };
 
 		__asm__ __volatile__("mov esp, 0x600000"	asml
 			 "sub esp, 24"			asml

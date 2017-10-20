@@ -1,9 +1,10 @@
 #include "mem/liballoc.hpp"
-#pragma GCC diagnostic push
+#include "types.hpp"
+//#pragma GCC diagnostic push
 
-#pragma GCC diagnostic ignored "-Wsign-compare"
-#pragma GCC diagnostic ignored "-Wpointer-to-int-cast"
-#pragma GCC diagnostic ignored "-Waddress"
+//#pragma GCC diagnostic ignored "-Wsign-compare"
+//#pragma GCC diagnostic ignored "-Wpointer-to-int-cast"
+//#pragma GCC diagnostic ignored "-Waddress"
 
 /**  Durand's Ridiculously Amazing Super Duper Memory functions.  */
 
@@ -20,10 +21,8 @@
 #define MODE	MODE_BEST
 
 #ifdef DEBUG
-//#include <stdio.h>
-#include "../ui/textmode.hpp"
+#include "libc/stdio.hpp"
 #endif
-
 
 struct boundary_tag* l_freePages[MAXEXP];		//< Allowing for 2^MAXEXP blocks
 int 				 l_completePages[MAXEXP];	//< Allowing for 2^MAXEXP blocks
@@ -35,9 +34,9 @@ unsigned int l_inuse = 0;			//< The amount of memory in use (malloc'ed).
 #endif
 
 
-static int l_initialized = 0;			//< Flag to indicate initialization.
-static int l_pageSize  = 4096;			//< Individual page size
-static int l_pageCount = 16;			//< Minimum number of pages to allocate.
+static unsigned l_initialized = 0;			//< Flag to indicate initialization.
+static unsigned l_pageSize  = 4096;			//< Individual page size
+static unsigned l_pageCount = 16;			//< Minimum number of pages to allocate.
 
 
 // ***********   HELPER FUNCTIONS  *******************************
@@ -57,11 +56,11 @@ static inline int getexp( unsigned int size )
 	}
 
 
-	int shift = MINEXP;
+	unsigned shift = MINEXP;
 
 	while ( shift < MAXEXP )
 	{
-		if ( (1<<shift) > size ) break;
+		if ( (unsigned)(1<<shift) > size ) break;
 		shift += 1;
 	}
 
@@ -75,8 +74,7 @@ static inline int getexp( unsigned int size )
 
 static void* 	liballoc_memset(void* s, int c, size_t n)
 {
-	int i;
-	for ( i = 0; i < n ; i++)
+	for (size_t i = 0; i < n ; i++)
 		((char*)s)[i] = c;
 
 	return s;
@@ -211,7 +209,7 @@ static inline struct boundary_tag* split_tag( struct boundary_tag* tag )
 	unsigned int remainder = tag->real_size - sizeof(struct boundary_tag) - tag->size;
 
 	struct boundary_tag *new_tag =
-				   (struct boundary_tag*)((unsigned int)tag + sizeof(struct boundary_tag) + tag->size);
+				   (struct boundary_tag*)((cpu_word_t)tag + sizeof(struct boundary_tag) + tag->size);
 
 						new_tag->magic = LIBALLOC_MAGIC;
 						new_tag->real_size = remainder;
@@ -378,7 +376,7 @@ void *PREFIX(malloc)(size_t size)
 
 
 
-	ptr = (void*)((unsigned int)tag + sizeof( struct boundary_tag ) );
+	ptr = (void*)((cpu_word_t)tag + sizeof( struct boundary_tag ) );
 
 
 
@@ -403,7 +401,7 @@ void PREFIX(free)(void *ptr)
 	liballoc_lock();
 
 
-		tag = (struct boundary_tag*)((unsigned int)ptr - sizeof( struct boundary_tag ));
+		tag = (struct boundary_tag*)((cpu_word_t)ptr - sizeof( struct boundary_tag ));
 
 		if ( tag->magic != LIBALLOC_MAGIC )
 		{
@@ -507,7 +505,7 @@ void*   PREFIX(realloc)(void *p, size_t size)
 {
 	void *ptr;
 	struct boundary_tag *tag;
-	int real_size;
+	size_t real_size;
 
 	if ( size == 0 )
 	{
@@ -517,7 +515,7 @@ void*   PREFIX(realloc)(void *p, size_t size)
 	if ( p == NULL ) return PREFIX(malloc)( size );
 
 	if ( liballoc_lock != NULL ) liballoc_lock();		// lockit
-		tag = (struct boundary_tag*)((unsigned int)p - sizeof( struct boundary_tag ));
+		tag = (struct boundary_tag*)((cpu_word_t)p - sizeof( struct boundary_tag ));
 		real_size = tag->size;
 	if ( liballoc_unlock != NULL ) liballoc_unlock();
 
@@ -530,4 +528,4 @@ void*   PREFIX(realloc)(void *p, size_t size)
 	return ptr;
 }
 
-#pragma GCC diagnostic pop
+//#pragma GCC diagnostic pop

@@ -1,4 +1,4 @@
-#include "idte.hpp"
+#include "idt/idte.hpp"
 
 namespace idt
 {

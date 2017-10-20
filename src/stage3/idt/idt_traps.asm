@@ -1,8 +1,19 @@
 [BITS 64]
 SECTION .text
-extern _interrupt_trap
+extern _interrupt_trap_gate
 
 [GLOBAL _ir_tail]
+
+
+%ifdef DEBUG_EXT
+	%define IDT_ERROR_MAGIC 1324657
+
+	%define push_IDT_ERROR_MAGIC push IDT_ERROR_MAGIC
+	%define POP_SIZE 16
+%elif
+	%define push_IDT_ERROR_MAGIC
+	%define POP_SIZE 8
+%endif
 
 %macro pushaq 0
 	push rax
@@ -23,13 +34,12 @@ extern _interrupt_trap
 	push r14
 	push r15
 
-	xor rax, rax
 	mov ax, ds
-	push rax
+	shl rax, 16
 	mov ax, es
-	push rax
+	shl rax, 16
 	mov ax, fs
-	push rax
+	shl rax, 16
 	mov ax, gs
 	push rax
 %endmacro
@@ -37,11 +47,11 @@ extern _interrupt_trap
 %macro popaq 0
 	pop rax
 	mov gs, ax
-	pop rax
+	shr rax, 16
 	mov fs, ax
-	pop rax
+	shr rax, 16
 	mov es, ax
-	pop rax
+	shr rax, 16
 	mov ds, ax
 
 	pop r15
@@ -70,29 +80,24 @@ extern _interrupt_trap
 	[global _isr%1]
 	_isr%1:
 	cli
-	%if (%1!=8) && (%1<10 || %1>14) && (%1!=17 && %1!=30)
-		push 0
-		push %1
-		jmp ir_common_stub_no_err
-	%else
-		push %1
-		jmp ir_common_stub_err
-	%endif
+	push_IDT_ERROR_MAGIC
+	push %1
+	jmp ir_common_stub
 %endmacro
 
 [global  _isr126]	    ;Rescheduling interrupt
 _isr126:
 	cli
-	push 0
+	push_IDT_ERROR_MAGIC
 	push 126
-	jmp ir_common_stub_no_err
+	jmp ir_common_stub
 
 [global  _isr127]
 _isr127:
 	cli
-	push 0
+	push_IDT_ERROR_MAGIC
 	push 127
-	jmp ir_common_stub_no_err
+	jmp ir_common_stub
 
 %assign routine_nr_s 0
 %rep ISR_C
@@ -107,9 +112,9 @@ _isr127:
 	[global _irq%1]
 	_irq%1:
 	cli
-	push 0
+	push_IDT_ERROR_MAGIC
 	push %1+32
-	jmp ir_common_stub_no_err
+	jmp ir_common_stub
 %endmacro
 
 %assign routine_nr_q 0
@@ -119,7 +124,7 @@ _isr127:
 %endrep
 
 ; General Interrupt method
-ir_common_stub_no_err:
+ir_common_stub:
 	pushaq			; macro
 
 	mov ax, 0x10
@@ -129,31 +134,11 @@ ir_common_stub_no_err:
 	mov gs, ax
 
 	mov rax, rsp
-	call _interrupt_trap
+	call _interrupt_trap_gate
 
 ;_ir_tail:
-	mov rsp, rax	;get the new cpu_state_t* as return value from the C method
+	mov rsp, rax		; get the new cpu_state_t* as return value from the C method
 
-	popaq			; macro
-	add rsp, 16		; pop error code and interrupt number
-	iretq			;iretq also makes an sti
-
-ir_common_stub_err:
-	pushaq			; macro
-
-	mov ax, 0x10
-	mov ds, ax
-	mov es, ax
-	mov fs, ax
-	mov gs, ax
-
-	mov rax, rsp
-	call _interrupt_trap
-
-;_ir_tail:
-	mov rsp, rax	;get the new cpu_state_t* as return value from the C method
-
-	popaq			; macro
-	add rsp, 8		; pop error code and interrupt number
-	iretq			;iretq also makes an sti
-
+	popaq				; macro
+	add rsp, POP_SIZE	; pop interrupt number and (error code | 0)
+	iretq				; iretq also makes an sti

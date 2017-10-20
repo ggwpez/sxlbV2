@@ -15,6 +15,5 @@ void* memcpy(void* __dest, void const* __src, size_t n)
 		++i;
 	}
 
-	// TODO
-	return 0;
+	return __dest;
 }

@@ -25,7 +25,7 @@ export AS    = nasm
 
 OPTI := -O0
 GENERALFLAGS := -fleading-underscore $(OPTI) -pipe -mno-red-zone -masm=intel -mno-sse -mno-sse2 -mno-sse3 -mno-ssse3 -mno-sse4.1 -mno-sse4.2 -mno-sse4 -mno-avx -mno-aes -mno-pclmul -mno-sse4a -mno-fma4 -mno-xop -mno-lwp -mno-3dnow -mno-popcnt -mno-abm
-ERRFLAGS := -Wextra -Wall -Wcast-align -Wdisabled-optimization -Wfloat-equal -Wformat -Wformat=2 -Wformat-nonliteral -Wformat-security  -Wformat-y2k -Wimport -Winit-self -Winline -Winvalid-pch -Wmissing-braces -Wmissing-field-initializers -Wmissing-format-attribute  -Wmissing-include-dirs -Wmissing-noreturn -Wparentheses -Wpointer-arith -Wredundant-decls -Wreturn-type -Wsequence-point -Wsign-compare -Wstack-protector -Wstrict-aliasing -Wstrict-aliasing=2 -Wswitch -Wswitch-default -Wswitch-enum -Wtrigraphs -Wuninitialized -Wunknown-pragmas -Wunreachable-code -Wunused -Wunused-function -Wunused-label -Wunused-parameter -Wunused-value -Wunused-variable -Wvariadic-macros -Wvolatile-register-var -Wwrite-strings
+WARFLAGS := -Wextra -Wall -Wcast-align -Wdisabled-optimization -Wfloat-equal -Wformat -Wformat=2 -Wformat-nonliteral -Wformat-security  -Wformat-y2k -Wimport -Winit-self -Winline -Winvalid-pch -Wmissing-braces -Wmissing-field-initializers -Wmissing-format-attribute  -Wmissing-include-dirs -Wmissing-noreturn -Wparentheses -Wpointer-arith -Wredundant-decls -Wreturn-type -Wsequence-point -Wsign-compare -Wstack-protector -Wstrict-aliasing -Wstrict-aliasing=2 -Wswitch -Wswitch-default -Wswitch-enum -Wtrigraphs -Wuninitialized -Wunknown-pragmas -Wunreachable-code -Wunused -Wunused-function -Wunused-label -Wunused-parameter -Wunused-value -Wunused-variable -Wvariadic-macros -Wvolatile-register-var -Wwrite-strings
 #  -Werror
 # Wont let me do 'point{ .x = 0, .y = 0 }' I mean wtf
 #  -Wpedantic
@@ -46,14 +46,30 @@ export DEPMAKER_END = $(PWD)src/dep_end.mk
 export INCLUDES = -I$(INCLUDE) -I$(INCLUDE)share/ -I$(INCLUDE)share/libk/ -I$(INCLUDE)share/libc/
 export DEPFLAGS = -MT $$@ -MMD -MP -MF $$(DEPDIR)$$*.$(EXT_DEP2)
 export PCOMPILE = mv -f $$(DEPDIR)$$*.$(EXT_DEP2) $$(DEPDIR)$$*.$(EXT_DEP) && touch $$@
-export GCCFLAGS = $(GENERALFLAGS) -std=c11 $(DBGFLAGS) $(ERRFLAGS) $(INCLUDES) $(DEPFLAGS) $(BUILD_NUMBER_FLAGS)
-export GCXXFLAGS =  $(GENERALFLAGS) -std=c++11 -fno-exceptions -fno-rtti $(DBGFLAGS) $(ERRFLAGS) $(INCLUDES) $(DEPFLAGS) $(BUILD_NUMBER_FLAGS)
+export GCXXFLAGS =  $(GENERALFLAGS) -std=c++11 -fno-exceptions -fno-rtti $(DBGFLAGS) $(WARFLAGS) $(INCLUDES) $(DEPFLAGS) $(BUILD_NUMBER_FLAGS)
 export GASFLAGS = -F dwarf -g -w+orphan-labels
 export GLDFLAGS = $(DBGFLAGS) $(OPTI) -z max-page-size=0x1000
 
 QEMUFLAGS := -hda $(ISO) -d cpu_reset -no-reboot
 
-all: $(ISO) | build_number.target
+all: all_dgb_ext
+
+all_release: GCCFLAGS += -DDEBUG=0 -DDEBUG_EXT=0
+all_release: GCXXFLAGS += -DDEBUG=0 -DDEBUG_EXT=0
+all_release: GASFLAGS = -dDEBUG=0 -dDEBUG_EXT=0
+all_release: build
+
+all_dgb: GCCFLAGS += -DDEBUG=1 -DDEBUG_EXT=0
+all_dgb: GCXXFLAGS += -DDEBUG=1 -DDEBUG_EXT=0
+all_dgb: GASFLAGS = -dDEBUG=1 -dDEBUG_EXT=0
+all_dgb: build
+
+all_dgb_ext: GCCFLAGS += -DDEBUG=1 -DDEBUG_EXT=1
+all_dgb_ext: GCXXFLAGS += -DDEBUG=1 -DDEBUG_EXT=1
+all_dgb_ext: GASFLAGS = -dDEBUG=1 -dDEBUG_EXT=1
+all_dgb_ext: build
+
+build: $(ISO) | build_number.target
 
 $(ISO): $(STAGE1_BIN) $(STAGE2_BIN) $(STAGE3_BIN) $(GRUB_CFG)
 	grub-mkrescue -o $(ISO) $(ISODIR)

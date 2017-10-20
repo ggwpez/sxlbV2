@@ -31,15 +31,15 @@ void stage1_main(void const* mbi, unsigned magic)
 	if (! cpu::get_config(cpu::CPU_CONFIG_OP::CPUID_EDX_MSR))
 		abort("MSR not supported, will not be able to enter 64 bit mode");
 
-	gdt_ptr* gdt = init_gdt();
-	/*uint32_t entry =*/ init(mbi, magic);
+	init(mbi, magic);
 	// Disable IRQs and load empty IDT
 	idt::load_empty_idt();
 	// Load GDT
+	gdt_ptr* gdt = init_gdt();
 	asmv("lgdt [eax]" :: "a"(gdt));
 	logl("GDT loaded at 0x%P", gdt);
 
-	paging::init((char*)KiB(256));
+	paging::init((char*)256_KiB);
 
 	// Flush code segment with far jump and reset other segments
 	asmv("jmp 0x8:.+7"		asml
@@ -53,10 +53,10 @@ void stage1_main(void const* mbi, unsigned magic)
 
 	// Jump in 64 bit stage2 kernel (spooky)
 	{
-		stage_pass_t pass = { BRIDGE_MAGIC, vga::get_tm(), mbi };
+		stage_pass_t pass = { BRIDGE_1_2_MAGIC, vga::get_tm(), mbi };
 
 		__asm__ __volatile__("mov esp, 0x600000"	asml
-			 "sub esp, 24"			asml
+			 "sub esp, 24"							asml
 			 "call eax" :: "a"(0x200000), "c"(&pass));
 	}
 	while (1);

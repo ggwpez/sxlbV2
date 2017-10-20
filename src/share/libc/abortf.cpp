@@ -10,7 +10,7 @@ void _abortf(char const* fmt, ...)
 
 	va_list ap;
 	va_start(ap, fmt);
-	vsnprintf(buf, 256, fmt, ap);
+	vsnprintf(buf, sizeof(buf), fmt, ap);
 	va_end(ap);
 
 	_abort(buf);

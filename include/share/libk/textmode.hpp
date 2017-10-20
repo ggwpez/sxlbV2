@@ -77,19 +77,18 @@ namespace vga
 
 		void ctrl_lf()
 		{
-			if (y < h)
-				++y;
-			else
+			if (++y >= h)
 				ctrl_scroll();
 		}
 
+		// FIXME override with default bc
 		void ctrl_scroll(int16_t const o = 1)
 		{
 			(void)o;
-			memcpy((void*)vid, ((uint16_t*)vid) +w, 2 *w *(h -1));
-
-			for (int i = 0; i < w *2; i += 2)
-				*(((uint16_t*)vid) + i +(((h -1)* w) << 1)) = ' ';
+			// Copy down
+			memcpy_elem<uint64_t>((uint64_t*)vid, (uint64_t*)(vid +(w << 1)), ((w *(h -1)) << 1) >> 3);
+			// Clear last line, TODO use default bc color
+			memset_elem<uint64_t>((uint64_t*)vid, (((uint16_t)clr << 8) | (uint16_t)' '), w >> 3);
 
 			if (y)
 				--y;
@@ -104,8 +103,11 @@ namespace vga
 		{
 			ctrl_reset_pos();
 
-			for (uint16_t i(0); i < w *h; ++i)
-				((uint16_t*)vid)[i] = (((uint16_t)clr << 8) | (uint16_t)' ');
+			/*for (uint16_t i(0); i < w *h; ++i)
+				((uint16_t*)vid)[i] = (((uint16_t)clr << 8) | (uint16_t)' ');*/
+			uint64_t c = (((uint16_t)clr << 8) | (uint16_t)' ');
+			uint64_t v = (c << 48) | (c << 32) | (c << 16) | c;
+			memset_elem<uint64_t>((uint64_t*)vid, v, (w *h << 1) >> 3);
 		}
 
 		enum class bc_t : uint8_t
@@ -134,7 +136,7 @@ namespace vga
 			MOD_INTENSITY	= 8			//modifier-bit for more intense symols
 		};
 
-	private:
+	public:
 		void ctrl_update()
 		{
 			uint16_t pos = get_index();
@@ -150,7 +152,15 @@ namespace vga
 			}
 		}
 
-		uint8_t clr;
+		union
+		{
+			uint8_t clr;
+			struct
+			{
+				fc_t fc;
+				bc_t bc;
+			};
+		};
 		uint16_t old_pos;
 	} __attribute__((packed,aligned(8)));
 }

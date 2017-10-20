@@ -8,12 +8,9 @@
 #define asmv(x) __asm__ __volatile__(x)
 #define asml "\t\n"
 
-#define DEBUG 1
-// Extendet debugging, this makes all things rly slow
-#define DEBUG_EXT 1
-
 // :DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD
-#define BRIDGE_MAGIC uint32_t(0xDDDDDDDD)
+#define BRIDGE_1_2_MAGIC uint32_t(0xDDDDDDDD)
+#define BRIDGE_2_3_MAGIC uint32_t(0xFD324FD8)
 
 #define BOCHS_BRK __asm__("xchg bx, bx");
 #define cli asmv("cli");
