@@ -16,14 +16,14 @@ C_BEGIN
 C_END
 
 template<typename T, size_t size = sizeof(T)>
-inline T* memset_elem(T* str, T const& val, size_t n)
+inline T* memset_elem(T* dst, T const& val, size_t n)
 {
-	assert(str && !(uint64_t(str) %size));
+	assert(dst && !(uint64_t(dst) %size));
 
 	for (size_t i = 0; i < n; ++i)
-		str[i] = val;
+		dst[i] = val;
 
-	return str;
+	return dst;
 }
 
 template<typename T, size_t size = sizeof(T)>

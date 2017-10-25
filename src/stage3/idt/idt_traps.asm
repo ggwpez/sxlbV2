@@ -5,14 +5,19 @@ extern _interrupt_trap_gate
 [GLOBAL _ir_tail]
 
 
+%define IDT_ERROR_MAGIC 0xfdfdfdfd
 %ifdef DEBUG_EXT
-	%define IDT_ERROR_MAGIC 1324657
+	%macro push_IDT_ERROR_MAGIC 0
+		sub rsp, 4
+		mov dword [rsp], IDT_ERROR_MAGIC
+		sub rsp, 4
+		mov dword [rsp], IDT_ERROR_MAGIC
+	%endmacro
 
-	%define push_IDT_ERROR_MAGIC push IDT_ERROR_MAGIC
-	%define POP_SIZE 16
+	%define pop_IDT_ERROR_MAGIC  add rsp, 8
 %elif
 	%define push_IDT_ERROR_MAGIC
-	%define POP_SIZE 8
+	%define pop_IDT_ERROR_MAGIC
 %endif
 
 %macro pushaq 0
@@ -140,5 +145,6 @@ ir_common_stub:
 	mov rsp, rax		; get the new cpu_state_t* as return value from the C method
 
 	popaq				; macro
-	add rsp, POP_SIZE	; pop interrupt number and (error code | 0)
+	pop_IDT_ERROR_MAGIC
+	add rsp, 8	; pop interrupt number and (error code | 0)
 	iretq				; iretq also makes an sti

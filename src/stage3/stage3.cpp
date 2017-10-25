@@ -12,9 +12,9 @@
 extern "C" void stage3_main() __attribute__((noreturn));
 
 uint64_t c;
-cpu_state_t* int_32(cpu_state_t* state)
+cpu_state_t* pf(cpu_state_t* state, uint32_t ec)
 {
-	//logl("INTERRUPT 32 #%llu", c++);
+	abortf("PAGE FAULT\nat 0x%X\nerr 0x%X", cpu::get_creg(2), uint64_t(ec));
 	//idt::interrupt_manager.clr_irq(0);
 
 	return state;
@@ -35,11 +35,11 @@ void stage3_main()
 	logl("stage3 is now stable 0x%P from 0x%P-0x%P size 0x%llu", STAGE3_VMA, &stage3_low, &stage3_high, &stage3_high -&stage3_low);
 	logl("%s", KERNEL_VERSION);
 
-	//memory::init(cfg->mbi);
 	idt::init();
+	idt::interrupt_manager.set_isr(14, &pf);
 	sti
+	memory::init(cfg->mbi);
 
-	idt::interrupt_manager.set_irq(0, &int_32);
 
 	while (1)
 	{

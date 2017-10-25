@@ -79,7 +79,7 @@ namespace memory
 			mapi(pml4_k, 510, pml4_k);*/
 			// Map kernal at -512GiB
 			//mmap(pml4_k, (void*)STAGE3_VMA, (void*)STAGE3_PHY, STAGE3_LEN, false);
-			mmap(pml4_k, (void*)-2048_GiB, nullptr, 1_MiB, false);
+			mmap(pml4_k, (void*)-1048_GiB, (void*)STAGE1_PML4_PHY, 1_MiB, false);
 		//}
 	}
 

@@ -4,7 +4,7 @@
 
 namespace idt
 {
-	typedef cpu_state_t*(*isr_cb_t)(cpu_state_t*);
+	typedef cpu_state_t*(*isr_cb_t)(cpu_state_t*,uint32_t);
 	typedef cpu_state_t*(*irq_cb_t)(cpu_state_t*);
 
 	#define ISR_C 128
@@ -15,7 +15,7 @@ namespace idt
 	public:
 		int_mng();
 
-		cpu_state_t* fire_isr(uint8_t, cpu_state_t*);
+		cpu_state_t* fire_isr(uint8_t, cpu_state_t*, uint32_t);
 		cpu_state_t* fire_irq(uint8_t, cpu_state_t*);
 
 		isr_cb_t const& set_isr(uint8_t, isr_cb_t const&);

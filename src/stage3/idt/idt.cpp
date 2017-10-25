@@ -7,7 +7,7 @@
 #include "idt/int_mng.hpp"
 #include <stdint.h>
 
-#define HAS_NO_ERRC(n) ((n)!=8) && ((n)<10 || (n)>14) && ((n)!=17 && (n)!=30)
+#define HAS_ERRC(n) ((n) == 8 || ((n) >= 10 && (n) <= 14) || (n) == 17)
 
 namespace idt
 {
@@ -20,7 +20,7 @@ namespace idt
 		"Division By Zero", "Debug", "Non Maskable Interrupt", "Breakpoint",
 		"Into Detected Overflow", "Out of Bounds", "Invalid Opcode", "No Coprocessor",
 		"Double Fault", "Coprocessor Segment Overrun", "Bad TSS", "Segment Not Present",
-		"Stack Fault", "General Protection Fault", "Page Fault", "Unknown Interrupt",
+		"Stack Fault", "General Protection Fault", "Page Fault", "Reserved",
 		"Coprocessor Fault", "Alignment Check", "Machine Check", "SIMD FPU Fault",
 		"Virtualization Fault", "Reserved", "Security Fault", "Nullptr Exception",
 		"Triple Fault", "Reserved", "Reserved", "Reserved",
@@ -41,7 +41,8 @@ namespace idt
 
 	idt_state_t* interrupt_isr_gate(idt_state_t* state)
 	{
-		cpu_state_t* cpu_state = interrupt_manager.fire_isr(state->int_num, &state->cpu);
+		uint32_t error_code = HAS_ERRC(state->int_num) ? state->error_code : 0;
+		cpu_state_t* cpu_state = interrupt_manager.fire_isr(state->int_num, &state->cpu, error_code);
 
 		if (! cpu_state)
 			// ISR was not handled by interrupt_manager, escalate
@@ -73,7 +74,7 @@ namespace idt
 		idt_state_t* state = tmp;
 
 #if DEBUG_EXT
-		if (HAS_NO_ERRC(state->int_num) && (state->error_magic != IDT_ERROR_MAGIC))
+		if ((state->error_magic != IDT_ERROR_MAGIC))
 		{
 			state->dump();
 			abortf("IDT magic wrong: 0x%X", state->error_magic);

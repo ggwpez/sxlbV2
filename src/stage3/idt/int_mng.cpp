@@ -12,14 +12,14 @@ namespace idt
 		memset_elem<irq_cb_t>(irq_cbs, irq_cb_t(nullptr), IRQ_C);
 	}
 
-	cpu_state_t* int_mng::fire_isr(uint8_t n, cpu_state_t* state)
+	cpu_state_t* int_mng::fire_isr(uint8_t n, cpu_state_t* state, uint32_t error_code)
 	{
 		isr_cb_t cb = isr_cbs[n];
 
 		if (! cb)
 			return nullptr;
 
-		return cb(state);
+		return cb(state, error_code);
 	}
 
 	cpu_state_t* int_mng::fire_irq(uint8_t n, cpu_state_t* state)

@@ -88,7 +88,9 @@ namespace vga
 			// Copy down
 			memcpy_elem<uint64_t>((uint64_t*)vid, (uint64_t*)(vid +(w << 1)), ((w *(h -1)) << 1) >> 3);
 			// Clear last line, TODO use default bc color
-			memset_elem<uint64_t>((uint64_t*)vid, (((uint16_t)clr << 8) | (uint16_t)' '), w >> 3);
+			uint64_t c = (((uint16_t)clr << 8) | (uint16_t)' ');
+			uint64_t v = (c << 48) | (c << 32) | (c << 16) | c;
+			memset_elem<uint64_t>((uint64_t*)(vid +(w *h *2) -w), v, w >> 3);
 
 			if (y)
 				--y;
@@ -99,12 +101,11 @@ namespace vga
 			x = y = 0;
 		}
 
+		// Clear screen
 		void ctrl_clear()
 		{
 			ctrl_reset_pos();
 
-			/*for (uint16_t i(0); i < w *h; ++i)
-				((uint16_t*)vid)[i] = (((uint16_t)clr << 8) | (uint16_t)' ');*/
 			uint64_t c = (((uint16_t)clr << 8) | (uint16_t)' ');
 			uint64_t v = (c << 48) | (c << 32) | (c << 16) | c;
 			memset_elem<uint64_t>((uint64_t*)vid, v, (w *h << 1) >> 3);

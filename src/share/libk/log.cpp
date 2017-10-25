@@ -12,7 +12,7 @@ static void time_stamp()
 	else if (__64__)
 		printf("[64/%u] ", cpu::rdtsc());
 	else
-		printf("[??/%u] ", cpu::rdtsc());
+		printf("[--/%u] ", cpu::rdtsc());
 }
 
 static void vlog(char const* fmt, va_list ap, bool print_time = true)

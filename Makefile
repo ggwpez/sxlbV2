@@ -1,6 +1,8 @@
 # NOTE
 # Next project will be a tutorial on how to make unreadable makefiles
 
+PREFIX := $(HOME)/opt/cross-64/bin/
+
 PWD := $(shell pwd)/
 BIN := $(PWD)bin/
 CFG := $(PWD)cfg/
@@ -19,8 +21,8 @@ ISO := $(BIN)sxlbV2.iso
 
 export CC32  = i686-elf-gcc
 export CXX32 = i686-elf-g++
-export CC64  = x86_64-elf-gcc
-export CXX64 = x86_64-elf-g++
+export CC64  = $(PREFIX)x86_64-elf-gcc
+export CXX64 = $(PREFIX)x86_64-elf-g++
 export AS    = nasm
 
 OPTI := -O0

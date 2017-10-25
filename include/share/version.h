@@ -6,9 +6,9 @@
 #include "macros.hpp"
 
 #if DEBUG_EXT
-	#define DEBUG_STR "-edbg"
+	#define DEBUG_STR "-eDBG"
 #elif DEBUG
-	#define DEBUG_STR "-dbg"
+	#define DEBUG_STR "-DBG"
 #else
 	#define DEBUG_STR ""
 #endif
