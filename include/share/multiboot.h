@@ -418,7 +418,7 @@ struct multiboot_tag_efi_mmap
 #include "defines.hpp"
 
 C_BEGIN
-uint32_t init(void const* ptr, unsigned magic);
+multiboot_tag_module* init(void const* ptr, unsigned magic);
 C_END
 #endif /* ! ASM_FILE */
 

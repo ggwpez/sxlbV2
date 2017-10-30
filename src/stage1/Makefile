@@ -9,7 +9,7 @@ OBJECTS := $(OBJECTS:%.$(EXT_ASM)=$(BINDIR)%.$(EXT_OBJ))
 
 ASFLAGSOBJ := -O32 -f elf32 $(GASFLAGS)
 
-CFLAGS := -m32 -fno-stack-protector -ffreestanding -D__IS_KERNEL__
+CFLAGS := -m32 -fno-stack-protector -ffreestanding -D__IS_KERNEL__ -D__STAGE__=$(STAGE)
 CXXFLAGS = $(CFLAGS) $(GCXXFLAGS) -I$(INCLUDE)stage1/
 LDFLAGS	:= -T link.ld -ffreestanding -nostdlib -nostartfiles -nodefaultlibs -lgcc -static $(GLDFLAGS)
 

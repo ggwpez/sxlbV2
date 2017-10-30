@@ -46,7 +46,13 @@ namespace idt
 
 		if (! cpu_state)
 			// ISR was not handled by interrupt_manager, escalate
-			abortf("ISR #%u, info: %s", state->int_num, isr_msgs[state->int_num]);
+		{
+			if (HAS_ERRC(state->int_num))
+				abortf("ISR #%u, code: 0x%X, info: %s", state->int_num, state->error_code, isr_msgs[state->int_num]);
+			else
+				abortf("ISR #%u, info: %s", state->int_num, isr_msgs[state->int_num]);
+
+		}
 		else if (cpu_state != &state->cpu)
 			state->cpu = *cpu_state;
 

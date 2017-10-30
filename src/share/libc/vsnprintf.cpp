@@ -6,7 +6,8 @@
 
 static inline size_t bufcpy(char* __dst, char const* __src)
 {
-	assert(__dst && __src);
+	assertp(__dst);
+	assertp(__src);
 	size_t l = 0;
 
 	while ((*__dst++ = *__src++))

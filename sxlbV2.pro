@@ -45,7 +45,8 @@ SOURCES += \
 	src/stage3/idt/idte.cpp \
 	src/stage3/mem/liballoc.cpp \
 	src/share/libk/log.cpp \
-    src/stage3/idt/int_mng.cpp
+    src/stage3/idt/int_mng.cpp \
+    src/share/libc/stack_trace.cpp
 
 HEADERS += \
 	./include/stage3/mem/memory.hpp \
@@ -95,7 +96,8 @@ HEADERS += \
 	include/share/enums.hpp \
 	include/stage3/cpu_state.hpp \
 	include/stage3/idt/idt_state.hpp \
-    include/stage3/idt/int_mng.hpp
+    include/stage3/idt/int_mng.hpp \
+    include/share/libc/stack_trace.hpp
 
 
 DISTFILES += \

@@ -4,7 +4,8 @@
 
 char* strcpy(char* __dst, char __const* __src)
 {
-	assert(__dst && __src);
+	assertp(__dst);
+	assertp(__src);
 	char* ret(__dst);
 
 	while ((*__dst++ = *__src++));

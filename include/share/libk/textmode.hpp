@@ -90,7 +90,7 @@ namespace vga
 			// Clear last line, TODO use default bc color
 			uint64_t c = (((uint16_t)clr << 8) | (uint16_t)' ');
 			uint64_t v = (c << 48) | (c << 32) | (c << 16) | c;
-			memset_elem<uint64_t>((uint64_t*)(vid +(w *h *2) -w), v, w >> 3);
+			memset_elem<uint64_t>((uint64_t*)(vid +(((w *h) -w) << 1)), v, w >> 2);
 
 			if (y)
 				--y;

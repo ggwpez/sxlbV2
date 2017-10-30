@@ -10,7 +10,7 @@ OBJECTS := $(OBJECTS:%.$(EXT_ASM)=$(BINDIR)%.$(EXT_OBJ))
 ASFLAGSOBJ := -O64 -f elf64 $(GASFLAGS)
 
 MCMODEL := large
-CFLAGS := -m64 -fno-stack-protector -ffreestanding -D__IS_KERNEL__ -mcmodel=$(MCMODEL)
+CFLAGS := -m64 -fno-stack-protector -ffreestanding -D__IS_KERNEL__ -mcmodel=$(MCMODEL) -D__STAGE__=$(STAGE)
 CXXFLAGS = $(CFLAGS) $(GCXXFLAGS) -I$(INCLUDE)stage3/
 LDFLAGS	:= -T link.ld -ffreestanding -nostdlib -nostartfiles -nodefaultlibs -lgcc -static $(GLDFLAGS)
 

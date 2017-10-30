@@ -14,37 +14,46 @@ extern "C" void stage3_main() __attribute__((noreturn));
 uint64_t c;
 cpu_state_t* pf(cpu_state_t* state, uint32_t ec)
 {
-	abortf("PAGE FAULT\nat 0x%X\nerr 0x%X", cpu::get_creg(2), uint64_t(ec));
-	//idt::interrupt_manager.clr_irq(0);
+	uint64_t at = cpu::get_creg(2);
 
-	return state;
+	if (at < PAGE_SIZE)
+		abortf("NULLPTR\n0x%X @ 0x%P", ec, at);
+	else
+		abortf("PAGE FAULT\n0x%X @ 0x%P", ec, at);
+
+	return nullptr;
 }
 
+void test()
+{
+	void* alloced = memory::malloc(PAGE_SIZE);
+
+	logl("ALLOC = 0x%P", alloced);
+}
+
+stage_pass_t cfg;
 void stage3_main()
 {
 	c = 0;
-	stage_pass_t* cfg;
 	{
 		register stage_pass_t* tmp asm("rcx");
-		cfg = tmp;
+		cfg = *tmp;
 	}
 
-	assert(cfg->magic == BRIDGE_2_3_MAGIC);
-	vga::set_tm(cfg->txt);
+	assert(cfg.magic == BRIDGE_2_3_MAGIC);
+	vga::set_tm(cfg.txt);
 
-	logl("stage3 is now stable 0x%P from 0x%P-0x%P size 0x%llu", STAGE3_VMA, &stage3_low, &stage3_high, &stage3_high -&stage3_low);
+	logl("stage3 is now stable 0x%P from 0x%P-0x%P size 0x%P", STAGE3_VMA, &stage3_low, &stage3_high, &stage3_high -&stage3_low);
 	logl("%s", KERNEL_VERSION);
 
 	idt::init();
 	idt::interrupt_manager.set_isr(14, &pf);
 	sti
-	memory::init(cfg->mbi);
 
+	memory::init(cfg.mbi);
 
-	while (1)
-	{
-		asm("int 32");
-	}
+	test();
+	STOP;
 }
 
 

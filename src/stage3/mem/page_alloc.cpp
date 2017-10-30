@@ -9,7 +9,7 @@ page_alloc::page_alloc(size_t mem_size_to_manage, void* buffer, size_t buff_size
 	check_align(mem_size_to_manage);
 
 	if (buff_size < needed_buffer_s(mem_size_to_manage))
-		abortf("page_alloc needs more initial memory, got 0x%X need 0x%X", buffer, needed_buffer_s(mem_size_to_manage));
+		abortf("page_alloc needs more initial memory, got 0x%P need 0x%X", buffer, needed_buffer_s(mem_size_to_manage));
 
 	memset(frames, PUSED, frame_count *8);
 
@@ -27,7 +27,7 @@ page_ptr_t page_alloc::alloc_page(page_ptr_t phys)
 		for (size_t i = 0; i < frame_count; ++i)
 			assert(! frames[i]);
 #endif
-		return PPTR_MIN;
+		return PPTR_INV;
 	}
 	else if (phys.valid())
 	{
@@ -54,6 +54,8 @@ page_ptr_t page_alloc::alloc_page(page_ptr_t phys)
 
 		abort("(pages_free != 0) indicated the existance of a free page, but I'm unable to find one");
 	}
+
+	return PPTR_INV;
 }
 
 page_ptr_t page_alloc::free_page(void* page)

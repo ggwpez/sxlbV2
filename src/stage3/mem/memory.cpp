@@ -1,26 +1,25 @@
 #include "defines.hpp"
 #include "mem/memory.hpp"
 #include "libk/mbi_iterator.hpp"
-#include "mem/page_alloc.hpp"
 #include "libk/log.hpp"
-#include "libk/pml4.hpp"
 #include "libk/mmu.hpp"
 #include "libc/assert.hpp"
 #include "libk/pml4_maper.hpp"
-
-static page_alloc pages;
+#include "mem/liballoc_he.hpp"
 
 using namespace paging;
 namespace memory
 {
-	ret_t mmap(pml4e_t* pml4, void* virt, void* phys, size_t size, bool fail_on_realloc);
-	void init(void const* mbi)
+	page_alloc pages;
+
+	void init(void const* const mbi)
 	{
 		size_t mem_hi = 0,
 			   usable = 0;
 		multiboot_tag_mmap const* mem_map = nullptr;
 		multiboot_tag const* tag;
 
+		logl("MBI 0x%X", mbi);
 		// Initialize memory info
 		{
 			mbi_iterator it(mbi);
@@ -62,9 +61,18 @@ namespace memory
 
 		logl("Memory found 0x%P aka %u MiB usable %u MiB", mem_hi, mem_hi /1048576, usable /1048576);
 
-		pml4e_t* pml4_k = ((pml4e_t*)STAGE3_PML4_VMA);
+		pml4e_t* pml4_k = MMU::kPML4();
 
 		logl("0x%P iPDP %u iPD %u iPT %u iP %u", pml4_k, MMU::iPDP(pml4_k), MMU::iPD(pml4_k), MMU::iPT(pml4_k), MMU::iP(pml4_k));
+
+
+		if (pml4_k[128].Value != 0xDEDEDEDEDEDEDEDE)
+			abortf("PML4 Magic wrong 0x%X", pml4_k[128].Value);
+		else
+		{
+			logl("Magic OK");
+			pml4_k[128].Value = 0;
+		}
 
 		logl("pml4 0x%P", pml4_k);
 		// Dont use the null page
@@ -79,7 +87,6 @@ namespace memory
 			mapi(pml4_k, 510, pml4_k);*/
 			// Map kernal at -512GiB
 			//mmap(pml4_k, (void*)STAGE3_VMA, (void*)STAGE3_PHY, STAGE3_LEN, false);
-			mmap(pml4_k, (void*)-1048_GiB, (void*)STAGE1_PML4_PHY, 1_MiB, false);
 		//}
 	}
 
@@ -94,22 +101,23 @@ namespace memory
 			pdpe_t* pdp = MMU::pPDP(pml4, virt);
 			pde_t * pd  = MMU::pPD (pml4, virt);
 			pte_t * pt  = MMU::pPT (pml4, virt);
-			logl("virt 0x%P pml4 0x%P pdp 0x%P pd 0x%P pt 0x%P this 0x%P", virt, pml4, pdp, pd, pt, pml4[510]);
+			logl("virt 0x%P pml4 0x%P pdp 0x%P pd 0x%P pt 0x%P this 0x%P", virt, pml4, pdp, pd, pt, pml4[RS]);
 
-			// Everything valid? If not and we cant realloc we are screwed
+			// Everything valid? If not check for realloc posibility
 			if ((! pdp->Value || ! pd->Value || ! pt->Value) && fail_on_realloc)
 				return RET_FAIL;
 
 			// Extend the PML4 as needed
 			if (! pdp->Value)
-				pdp->Value = pages.alloc_page().page_ptr |3;
-			if (! pd ->Value)
-				pd ->Value = pages.alloc_page().page_ptr |3;
-			if (! pt ->Value)
-				pt ->Value = pages.alloc_page().page_ptr |3;
+				pdp->Value = pages.alloc_page().page_ptr;
+			if (! pd->Value)
+				pd->Value = pages.alloc_page().page_ptr;
+			if (! pt->Value)
+				pt->Value = pages.alloc_page().page_ptr;
 			// FIXME memclr
 			// Errors are indicated by not page aligned return
-			assert(! ((pdp->Value | pd->Value | pt->Value) %PAGE_SIZE));
+			if ((pdp->Value | pd->Value | pt->Value) %PAGE_SIZE)
+				abortf("pdp 0x%P pd 0x%P pt 0x%P", pdp->Value, pd->Value, pt->Value);
 
 			// Magic
 			pt[MMU::iP(virt)].Value = uint64_t(phys) |3;
@@ -133,9 +141,9 @@ namespace memory
 		return nullptr;
 	}
 
-	void* malloc(size_t)
+	void* malloc(size_t size)
 	{
-		return nullptr;
+		return liballoc_alloc(size);
 	}
 
 	void* free(void*)

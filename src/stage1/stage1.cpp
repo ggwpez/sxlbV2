@@ -7,6 +7,7 @@
 #include "libk/vga.hpp"
 #include "libc/assert.hpp"
 #include "libk/port.hpp"
+#include "libk/elf-64.h"
 #include "libk/pml4.hpp"
 #include "log.hpp"
 #include "empty_idt.hpp"
@@ -31,7 +32,16 @@ void stage1_main(void const* mbi, unsigned magic)
 	if (! cpu::get_config(cpu::CPU_CONFIG_OP::CPUID_EDX_MSR))
 		abort("MSR not supported, will not be able to enter 64 bit mode");
 
-	init(mbi, magic);
+	multiboot_tag_module* stage2 = init(mbi, magic);
+	if (! stage2)
+		abort("Could not find stage2 as GRUB module");
+
+	logl("Loading stage2 '%s' at 0x%X-0x%X size 0x%X", stage2->cmdline, stage2->mod_start, stage2->mod_end, stage2->mod_end -stage2->mod_start);
+	elf_status_t status;
+	uint32_t entry = load_elf((void*)stage2->mod_start, &status);
+
+	if (status != ELF_ERR_OK)
+		abortf("Could not load stage2 (ELF64), status: %u", status);
 	// Disable IRQs and load empty IDT
 	idt::load_empty_idt();
 	// Load GDT
@@ -56,8 +66,8 @@ void stage1_main(void const* mbi, unsigned magic)
 		stage_pass_t pass = { BRIDGE_1_2_MAGIC, vga::get_tm(), mbi };
 
 		__asm__ __volatile__("mov esp, 0x600000"	asml
-			 "sub esp, 24"							asml
-			 "call eax" :: "a"(0x200000), "c"(&pass));
+			 "call eax" :: "a"(entry), "c"(&pass));
 	}
-	while (1);
+
+	abort("UNREACHABLE\nStage1 main reached after jumping to stage2");
 }

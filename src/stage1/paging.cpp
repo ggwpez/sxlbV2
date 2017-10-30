@@ -27,16 +27,17 @@ namespace paging
 		pde_t*   pde_k   = (pde_t*  )(free_space +0x4000);
 		// Allocate space for three pte so we have 0-6 MiB identity mapped
 		pte_t*   pte02    = (pte_t*  )(free_space +0x5000);
+		// Also 6 MiB for the kernel at -512 GiB
 		pte_t*   pte02_k  = (pte_t*  )(free_space +0x8000);
 
 		memset(pml4, 0, PAGE_SIZE);
+		mapi(pml4, 0, pdp);
 		// Map kernel at -512GiB
 		mapi(pml4, 511, pdp_k);
 		// Map PML4 recursively at -1024GiB
-		for (int i = 1; i < 511; ++i)
-			mapi(pml4, i, pml4);
+		mapi(pml4, 510, pml4);
+		mapi(pml4, 128, 0xDEDEDEDEDEDEDEDE, 0);
 		// ID map first 6 MiB
-		mapi(pml4, 0, pdp);
 
 		mapi(pdp, 0, pde);
 		mapi(pdp_k, 0, pde_k);
@@ -45,6 +46,8 @@ namespace paging
 		mapm(pde_k, pte02_k, 0, 3);
 
 		mapm(pte02, (void*)0x000000, 0, 512 *3);
+		// Dont map nullptr
+		//mapi(pte02, 0, nullptr, 0);
 		mapm(pte02_k, (void*)STAGE3_PHY, 0, 512 *3);
 
 		if (! cpu::set_config(cpu::CPU_CONFIG_OP::CR4_PHYS_ADDR_EXT, 1))

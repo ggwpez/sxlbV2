@@ -87,6 +87,7 @@ namespace cpu
 		return -1;
 	}
 
+
 	/*Gets the value from: cr0, cr2, cr3, cr4*/
 	cpu_word_t get_creg(uint8_t number)
 	{

@@ -8,6 +8,5 @@ void _abort(char const* msg)
 	printf("\nERROR\n");
 	puts(msg);			// unclean
 
-	__asm__("hlt");
-	while (1);
+	STOP;
 }

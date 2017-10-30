@@ -8,11 +8,11 @@
 static void time_stamp()
 {
 	if (__32__)
-		printf("[32/%u] ", cpu::rdtsc());
+		printf("[%u/%u] ", __STAGE__, cpu::rdtsc());
 	else if (__64__)
-		printf("[64/%u] ", cpu::rdtsc());
+		printf("[%u/%u] ", __STAGE__, cpu::rdtsc());
 	else
-		printf("[--/%u] ", cpu::rdtsc());
+		printf("[%u/%u] ", __STAGE__, cpu::rdtsc());
 }
 
 static void vlog(char const* fmt, va_list ap, bool print_time = true)

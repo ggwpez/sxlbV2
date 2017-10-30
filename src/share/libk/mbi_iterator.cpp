@@ -1,7 +1,7 @@
 #include "mbi_iterator.hpp"
 #include "assert.hpp"
 
-mbi_iterator::mbi_iterator(void const* mbi)
+mbi_iterator::mbi_iterator(const void* mbi)
 	: tag((multiboot_tag const*)((cpu_word_t)mbi +8))
 {
 	assert(! ((cpu_word_t)mbi &7));

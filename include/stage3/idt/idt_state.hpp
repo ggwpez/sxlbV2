@@ -11,7 +11,9 @@ struct idt_state_t
 #if DEBUG_EXT
 	uint64_t error_magic;
 #endif
+	// Saved by cpu
 	uint64_t error_code;
+	uint64_t rip, cs, rflags, uesp, ss;
 
 	inline void dump()
 	{

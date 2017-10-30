@@ -36,26 +36,26 @@ void stage2_main()
 				continue;
 
 			elf_status_t status;
-			logl("Loading module '%s' at 0x%X-0x%X size 0x%X",
-				 mod->cmdline, mod->mod_start, mod->mod_end, mod->mod_end -mod->mod_start);
+			logl("Loading stage3 '%s' at 0x%X-0x%X size 0x%X", mod->cmdline, mod->mod_start, mod->mod_end, mod->mod_end -mod->mod_start);
 			uint64_t entry = load_elf((void*)uint64_t(mod->mod_start), &status);
 
 			if (status == ELF_ERR_OK)
 				stage3_entry = entry;
+			else
+				abortf("Could not load stage2 (ELF64), status: %u", status);
 		}
 	}
 
 	if (! stage3_entry)
-		abort("Could not find stage3, abort");
+		abort("Could not find stage3 as GRUB module");
 
 	// Jump in 64 bit stage3 kernel (spooky^2)
 	{
 		stage_pass_t pass = { BRIDGE_2_3_MAGIC, vga::get_tm(), cfg->mbi };
 
 		__asm__ __volatile__("mov esp, 0x600000"	asml
-			 "sub esp, 24"			asml
 			 "call rax" :: "a"(stage3_entry), "c"(&pass));
 	}
 
-	while (1);
+	abort("UNREACHABLE\nStage2 main reached after jumping to stage3");
 }

@@ -4,7 +4,8 @@
 
 char* strncpy(char* __dst, char __const* __src, size_t __n)
 {
-	assert(__dst && __src);
+	assertp(__dst);
+	assertp(__src);
 	size_t i(0);
 	char c;
 

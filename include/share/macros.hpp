@@ -35,3 +35,17 @@ constexpr inline auto ROUND_DW(T const& v, S const& m)
 
 #define STR_HELPER(x) #x
 #define STR(x) STR_HELPER(x)
+
+#define asmv(x) __asm__ __volatile__(x)
+#define asml "\t\n"
+
+#define BOCHS_BRK __asm__("xchg bx, bx");
+#define cli asmv("cli");
+#define sti asmv("sti");
+
+#define ATT_PACKED __attribute__((packed))
+#define ATT_NORET  __attribute__((noreturn))
+
+#define UNREACHABLE abort("Reached unreachable code");
+#define HLT asmv("hlt")
+#define STOP HLT; while(1)

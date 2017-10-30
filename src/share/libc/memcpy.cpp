@@ -6,7 +6,8 @@
 
 void* memcpy(void* __dest, void const* __src, size_t n)
 {
-	assert(__dest && __src);
+	assertp(__dest);
+	assertp(__src);
 	// TODO check alignment for multibyte copy
 	size_t i = 0;
 	while(i < n)

@@ -4,7 +4,6 @@ extern _interrupt_trap_gate
 
 [GLOBAL _ir_tail]
 
-
 %define IDT_ERROR_MAGIC 0xfdfdfdfd
 %ifdef DEBUG_EXT
 	%macro push_IDT_ERROR_MAGIC 0
@@ -139,6 +138,7 @@ ir_common_stub:
 	mov gs, ax
 
 	mov rax, rsp
+	and rsp, 0xFFFFFFFFFFFFFFF0
 	call _interrupt_trap_gate
 
 ;_ir_tail:

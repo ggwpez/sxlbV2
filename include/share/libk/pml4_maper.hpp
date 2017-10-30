@@ -4,10 +4,10 @@
 
 namespace paging
 {
-	uint64_t const flags = B(11);
+	uint8_t const present_flags = B(11);
 
 	template<typename T, typename S>
-	inline T* mapi(T* ptr, uint16_t index, S p)
+	inline T* mapi(T* ptr, uint16_t index, S p, uint8_t flags = present_flags)
 	{
 		ptr[index].Value = uint64_t(p) | flags;
 
@@ -15,10 +15,10 @@ namespace paging
 	}
 
 	template<typename T>
-	inline T* mapm(T* ptr, void* pages, uint16_t start, uint16_t n)
+	inline T* mapm(T* ptr, void* pages, uint16_t start, uint16_t n, uint8_t flags = present_flags)
 	{
 		for (uint32_t i = 0; i < n; ++i)
-			mapi(ptr, start +i, (char*)pages +0x1000 *i);
+			mapi(ptr, start +i, (char*)pages +0x1000 *i, flags);
 
 		return ptr;
 	}

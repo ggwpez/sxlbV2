@@ -5,7 +5,7 @@ SOURCES := $(wildcard **/*.$(EXT_CPP)) $(wildcard **/*.$(EXT_ASM)) $(wildcard *.
 OBJECTS := $(SOURCES:%.$(EXT_CPP)=$(BINDIR)%.$(EXT_OBJ))
 OBJECTS := $(OBJECTS:%.$(EXT_ASM)=$(BINDIR)%.$(EXT_OBJ))
 
-CXXFLAGS = -fno-stack-protector -ffreestanding -D__IS_LIB__ $(LCXXFLAGS)
+CXXFLAGS = -fno-stack-protector -ffreestanding -D__IS_LIB__ $(LCXXFLAGS) -D__STAGE__=$(STAGE)
 LDFLAGS  = -T link.ld -ffreestanding -nostartfiles -nodefaultlibs -nostdlib -lgcc -static $(LLDFLAGS)
 ASFLAGS  = $(LASFLAGS)
 
