@@ -98,12 +98,13 @@ namespace memory
 
 		for (size_t i = 0; i < size; i += PAGE_SIZE, virt = (void*)(uint64_t(virt) +PAGE_SIZE), phys = (void*)(uint64_t(phys) +PAGE_SIZE))
 		{
-			pdpe_t* pdp = MMU::pPDP(pml4, virt);
-			pde_t * pd  = MMU::pPD (pml4, virt);
-			pte_t * pt  = MMU::pPT (pml4, virt);
+			pdpe_t* pdp = MMU::pPDP(pml4, virt) +MMU::iPDP(virt);
+			pde_t * pd  = MMU::pPD (pml4, virt) +MMU::iPD(virt);
+			pte_t * pt  = MMU::pPT (pml4, virt) +MMU::iPT(virt);
 			logl("virt 0x%P pml4 0x%P pdp 0x%P pd 0x%P pt 0x%P this 0x%P", virt, pml4, pdp, pd, pt, pml4[RS]);
 
 			// Everything valid? If not check for realloc posibility
+			BOCHS_BRK
 			if ((! pdp->Value || ! pd->Value || ! pt->Value) && fail_on_realloc)
 				return RET_FAIL;
 

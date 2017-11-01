@@ -72,24 +72,28 @@ struct MMU
 	pPDP(pml4e_t* pml4, void const* vma)
 	{
 		return (pdpe_t*)(uint64_t(kPDP()) +((uint64_t(vma) >> 27) &0x00001FF000));
+		//return kPDP() +uint64_t(iPDP(vma)) *0x1000;
 	}
 
 	static constexpr inline pde_t*
 	pPD(pml4e_t* pml4,void const* vma)
 	{
 		return (pde_t*)(uint64_t(kPD()) +((uint64_t(vma) >> 18) &0x003FFFF000));
+		//return kPD() +uint64_t(iPD(vma)) *0x1000;
 	}
 
 	static constexpr inline pte_t*
 	pPT(pml4e_t* pml4,void const* vma)
 	{
 		return (pte_t*)(uint64_t(kPT()) +((uint64_t(vma) >> 9) &0x7FFFFFF000));
+		//return kPT() +uint64_t(iPT(vma)) *0x1000;
 	}
 
 	static constexpr inline pte_t*
 	pP(pml4e_t* pml4,void const* vma)
 	{
 		return &pPT(pml4, vma)[iP(vma)];
+		//return nullptr;
 	}
 	//
 
