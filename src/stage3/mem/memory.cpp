@@ -5,6 +5,7 @@
 #include "libk/mmu.hpp"
 #include "libc/assert.hpp"
 #include "libk/pml4_maper.hpp"
+#include "libk/cpuid.hpp"
 #include "mem/liballoc_he.hpp"
 
 using namespace paging;
@@ -59,12 +60,11 @@ namespace memory
 			}
 		}
 
+		// Dont use NULL page
+		pages.set_mem_region(nullptr, PAGE_SIZE, PUSED);
 		logl("Memory found 0x%P aka %u MiB usable %u MiB", mem_hi, mem_hi /1048576, usable /1048576);
 
 		pml4e_t* pml4_k = MMU::kPML4();
-
-		logl("0x%P iPDP %u iPD %u iPT %u iP %u", pml4_k, MMU::iPDP(pml4_k), MMU::iPD(pml4_k), MMU::iPT(pml4_k), MMU::iP(pml4_k));
-
 
 		if (pml4_k[128].Value != 0xDEDEDEDEDEDEDEDE)
 			abortf("PML4 Magic wrong 0x%X", pml4_k[128].Value);
@@ -88,6 +88,7 @@ namespace memory
 			// Map kernal at -512GiB
 			//mmap(pml4_k, (void*)STAGE3_VMA, (void*)STAGE3_PHY, STAGE3_LEN, false);
 		//}
+		cpu::set_creg(3, (uint64_t)STAGE1_PML4_PHY);
 	}
 
 	// fail_on_realloc tells if pml4 can be extended as needed
@@ -98,32 +99,32 @@ namespace memory
 
 		for (size_t i = 0; i < size; i += PAGE_SIZE, virt = (void*)(uint64_t(virt) +PAGE_SIZE), phys = (void*)(uint64_t(phys) +PAGE_SIZE))
 		{
-			pdpe_t* pdp = MMU::pPDP(pml4, virt) +MMU::iPDP(virt);
-			pde_t * pd  = MMU::pPD (pml4, virt) +MMU::iPD(virt);
-			pte_t * pt  = MMU::pPT (pml4, virt) +MMU::iPT(virt);
-			logl("virt 0x%P pml4 0x%P pdp 0x%P pd 0x%P pt 0x%P this 0x%P", virt, pml4, pdp, pd, pt, pml4[RS]);
+			pml4e_t* pml4e = &MMU::pPML4(pml4, virt)[MMU::iPML4(virt)];
 
-			// Everything valid? If not check for realloc posibility
-			BOCHS_BRK
-			if ((! pdp->Value || ! pd->Value || ! pt->Value) && fail_on_realloc)
-				return RET_FAIL;
+			if (! pml4e->Value)
+			{
+				pdpe_t* pdp = (pdpe_t*)(pages.alloc_page(PPTR_INV, true).page_ptr);
+				pml4e->Value = uint64_t(pdp) | 3;
+				pdpe_t* pdpe = &pdp[MMU::iPDP(virt)];
 
-			// Extend the PML4 as needed
-			if (! pdp->Value)
-				pdp->Value = pages.alloc_page().page_ptr;
-			if (! pd->Value)
-				pd->Value = pages.alloc_page().page_ptr;
-			if (! pt->Value)
-				pt->Value = pages.alloc_page().page_ptr;
-			// FIXME memclr
-			// Errors are indicated by not page aligned return
-			if ((pdp->Value | pd->Value | pt->Value) %PAGE_SIZE)
-				abortf("pdp 0x%P pd 0x%P pt 0x%P", pdp->Value, pd->Value, pt->Value);
+				pde_t* pd = (pde_t*)(pages.alloc_page(PPTR_INV, true).page_ptr);
+				pdpe->Value = uint64_t(pd) | 3;
+				pde_t* pde = &pd[MMU::iPD(virt)];
 
-			// Magic
-			pt[MMU::iP(virt)].Value = uint64_t(phys) |3;
+				pte_t* pt = (pte_t*)(pages.alloc_page(PPTR_INV, true).page_ptr);
+				pde->Value = uint64_t(pt) | 3;
+				pte_t* pte = &pt[MMU::iPT(virt)];
+
+				pte->Value = uint64_t(phys) | 3;
+
+				logl("pml4 0x%P pml4e 0x%P pml4e->V 0x%P pdp 0x%P pdpe 0x%P pdpe->V 0x%P pd 0x%P pde 0x%P pde->V 0x%P pt 0x%P pte 0x%P pte->V 0x%P phys 0x%P virt 0x%P",
+					 pml4, pml4e, pml4e->Value, pdp, pdpe, pdpe->Value, pd, pde, pde->Value, pt, pte, pte->Value, phys, virt);
+			}
+			else
+				abort("no");
 		}
 
+		cpu::set_creg(3, (uint64_t)STAGE1_PML4_PHY);
 		return RET_OK;
 	}
 

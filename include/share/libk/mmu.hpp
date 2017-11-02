@@ -11,25 +11,25 @@ struct MMU
 {
 	// Returns the indices
 	static constexpr inline uint16_t
-	iPDP(void const* vma)
+	iPML4(void const* vma)
 	{
 		return (uint64_t(vma) >>39) &511;
 	}
 
 	static constexpr inline uint16_t
-	iPD(void const* vma)
+	iPDP(void const* vma)
 	{
 		return (uint64_t(vma) >>30) &511;
 	}
 
 	static constexpr inline uint16_t
-	iPT(void const* vma)
+	iPD(void const* vma)
 	{
 		return (uint64_t(vma) >>21) &511;
 	}
 
 	static constexpr inline uint16_t
-	iP(void const* vma)
+	iPT(void const* vma)
 	{
 		return (uint64_t(vma) >>12) &511;
 	}
@@ -89,19 +89,19 @@ struct MMU
 		//return kPT() +uint64_t(iPT(vma)) *0x1000;
 	}
 
-	static constexpr inline pte_t*
+	/*static constexpr inline pte_t*
 	pP(pml4e_t* pml4,void const* vma)
 	{
 		return &pPT(pml4, vma)[iP(vma)];
 		//return nullptr;
-	}
+	}*/
 	//
 
-	static constexpr inline void*
+	/*static constexpr inline void*
 	phys(pml4e_t* pml4, void const* vma)
 	{
 		return (void*)(pP(pml4, vma)->flags.pointer << 12);
-	}
+	}*/
 };
 
 static_assert(PAGE_SIZE_BITS == 12, "Wont work otherwise");

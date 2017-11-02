@@ -20,7 +20,7 @@ public:
 	page_alloc(size_t mem_size_to_manage, void* buffer, size_t buff_size);
 
 	// Accepting phys as parameter automatically allows me to check the alignment of phys with ! phys.invalid
-	page_ptr_t alloc_page(page_ptr_t phys = PPTR_INV);
+	page_ptr_t alloc_page(page_ptr_t phys = PPTR_INV, bool abort_on_fail = false);
 	page_ptr_t free_page(void* page);
 	page_ptr_t free_page(nullptr_t) = delete;
 

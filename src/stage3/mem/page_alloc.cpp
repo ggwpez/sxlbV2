@@ -11,15 +11,17 @@ page_alloc::page_alloc(size_t mem_size_to_manage, void* buffer, size_t buff_size
 	if (buff_size < needed_buffer_s(mem_size_to_manage))
 		abortf("page_alloc needs more initial memory, got 0x%P need 0x%X", buffer, needed_buffer_s(mem_size_to_manage));
 
-	memset(frames, PUSED, frame_count *8);
+	// PUSED == 0
+	memset(frames, PUSED, frame_count /8);
 
 	if (DEBUG_EXT)
 		logl("page_alloc mem 0x%X buff 0x%P buff_s 0x%X needed 0x%X frame_c %u page_c %u",
 			   mem_size_to_manage, buffer, buff_size, needed_buffer_s(mem_size_to_manage), frame_count, page_count);
 }
 
-page_ptr_t page_alloc::alloc_page(page_ptr_t phys)
+page_ptr_t page_alloc::alloc_page(page_ptr_t phys, bool abort_on_fail)
 {
+	page_ptr_t ret = PPTR_INV;
 	// Pages free?
 	if (! pages_free)
 	{
@@ -27,7 +29,7 @@ page_ptr_t page_alloc::alloc_page(page_ptr_t phys)
 		for (size_t i = 0; i < frame_count; ++i)
 			assert(! frames[i]);
 #endif
-		return PPTR_INV;
+		//return PPTR_INV;
 	}
 	else if (phys.valid())
 	{
@@ -36,8 +38,7 @@ page_ptr_t page_alloc::alloc_page(page_ptr_t phys)
 			abort("Page already allocated");
 
 		set_entry(it, PUSED);
-
-		return phys;
+		ret = phys;
 	}
 	else
 	{
@@ -48,14 +49,19 @@ page_ptr_t page_alloc::alloc_page(page_ptr_t phys)
 			{
 				set_entry(it, PUSED);
 
-				return *it;
+				ret = *it;
+				break;
 			}
 		}
 
-		abort("(pages_free != 0) indicated the existance of a free page, but I'm unable to find one");
+		if (ret.invalid())
+			abort("(pages_free != 0) indicated the existance of a free page, but I'm unable to find one");
 	}
 
-	return PPTR_INV;
+	if (ret.invalid())
+		abortf("Failed to allocate frame (abort_on_fail=true), requested ptr=0x%X", phys._data);
+	else
+		return ret;
 }
 
 page_ptr_t page_alloc::free_page(void* page)
@@ -129,6 +135,7 @@ void page_alloc::set_entry(const iterator_t& it, int v)
 		if (v == PFREE)
 		{
 			pages_free++;
+			//printf("+1: pages_free %u @ 0x%X\n", pages_free, (void*)*it);
 			if (pages_free > page_count)
 				abortf("%u vs %u", pages_free, page_count);
 		}
@@ -136,6 +143,7 @@ void page_alloc::set_entry(const iterator_t& it, int v)
 		{
 			assert(pages_free);
 			pages_free--;
+			//printf("-1: pages_free %u @ 0x%X\n", pages_free, (void*)*it);
 		}
 	}
 }

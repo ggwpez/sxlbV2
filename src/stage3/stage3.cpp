@@ -8,6 +8,7 @@
 #include "libc/assert.hpp"
 #include "mem/memory.hpp"
 #include "idt/idt.hpp"
+#include "libc/stdio.hpp"
 
 extern "C" void stage3_main() __attribute__((noreturn));
 
@@ -24,11 +25,28 @@ cpu_state_t* pf(cpu_state_t* state, uint32_t ec)
 	return nullptr;
 }
 
+#include "libk/mmu.hpp"
 void test()
 {
-	void* alloced = memory::malloc(PAGE_SIZE);
+	size_t const ALLOC_SIZE = 4096;
+	void* alloced = memory::malloc(ALLOC_SIZE);
 
 	logl("ALLOC = 0x%P", alloced);
+	uint8_t* bytes = (uint8_t*)alloced;
+
+	*(bytes +ALLOC_SIZE +1) = 8;
+	//memset_elem<uint8_t>(bytes, uint8_t(0x41), ALLOC_SIZE);
+
+	/*for (size_t i = 0; i < ALLOC_SIZE; ++i)
+	{
+		if (bytes[i])
+			putchar(bytes[i]);
+		else
+			putchar('0');
+	}
+
+	for (int i = 0; i < 512; ++i)
+		*bytes = 1;*/
 }
 
 stage_pass_t cfg;

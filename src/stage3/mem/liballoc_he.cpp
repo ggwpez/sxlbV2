@@ -21,7 +21,7 @@ int liballoc_unlock()
 	return 0;
 }
 
-static uint64_t virt = 1024_GiB;
+static uint64_t virt = 1024_GiB +PAGE_SIZE;
 void* liballoc_alloc(int size)
 {
 	// Alloc page from page_alloc
@@ -32,11 +32,11 @@ void* liballoc_alloc(int size)
 	for (size_t i = 0; i < (size /PAGE_SIZE); ++i)
 	{
 		assertp(virt);
-		ret_t code = memory::mmap(MMU::kPML4(), (void*)virt, memory::pages.alloc_page().operator void *(), PAGE_SIZE, false);
-		virt += PAGE_SIZE;
+		ret_t code = memory::mmap(MMU::kPML4(), (void*)virt, (void*)memory::pages.alloc_page().page_ptr, PAGE_SIZE, false);
 
 		if (code != RET_OK)
 			abort("MMAP failed");
+		virt += PAGE_SIZE;
 	}
 
 	return (void*)ret;
