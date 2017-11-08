@@ -1,4 +1,3 @@
-#include "lspace.h"
 #include "string.hpp"
 
 char* strrev(char* str)

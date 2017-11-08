@@ -24,6 +24,8 @@ page_iterator<page_size, frame_width>& page_iterator<page_size, frame_width>::op
 {
 	_off++;
 
+	if (DEBUG_EXT)
+		assert(_off <= frame_width);
 	// Overflow ?
 	if (_off == frame_width)
 	{

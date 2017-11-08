@@ -19,3 +19,9 @@
 	#define C_END
 	#define static_assert _Static_assert
 #endif
+
+#define BEGIN_CRITICAL_SECTION (void)0
+#define END_CRITICAL_SECTION (void)0
+
+//#define PAGE_FLAGS B(10011)
+#define PAGE_FLAGS 3

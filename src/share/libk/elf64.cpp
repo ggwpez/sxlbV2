@@ -1,4 +1,3 @@
-#include "lspace.h"
 #include "elf-64.h"
 #include "libc/string.hpp"
 #include "libc/abort.hpp"

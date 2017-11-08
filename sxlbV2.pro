@@ -46,7 +46,8 @@ SOURCES += \
 	src/stage3/mem/liballoc.cpp \
 	src/share/libk/log.cpp \
     src/stage3/idt/int_mng.cpp \
-    src/share/libc/stack_trace.cpp
+    src/share/libc/stack_trace.cpp \
+    src/share/libk/rollback_collect.cpp
 
 HEADERS += \
 	./include/stage3/mem/memory.hpp \
@@ -70,8 +71,6 @@ HEADERS += \
 	./include/share/libk/cpuid.hpp \
 	./include/share/libk/port.hpp \
 	./include/stage1/empty_idt.hpp \
-	include/share/kspace.h \
-	include/share/lspace.h \
 	include/share/multiboot.h \
 	include/share/stage_pass.hpp \
 	include/share/uspace.h \
@@ -97,7 +96,8 @@ HEADERS += \
 	include/stage3/cpu_state.hpp \
 	include/stage3/idt/idt_state.hpp \
     include/stage3/idt/int_mng.hpp \
-    include/share/libc/stack_trace.hpp
+    include/share/libc/stack_trace.hpp \
+    include/share/libk/rollback_collect.hpp
 
 
 DISTFILES += \

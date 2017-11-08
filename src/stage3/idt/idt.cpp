@@ -29,6 +29,7 @@ namespace idt
 
 	void init()
 	{
+		logl("IDT @0x%P IDTptr @0x%P", idt, &ptr);
 		// This *8 is not a mistake, same as in legacy mode
 		ptr.limit = (IDT_ENTRIES *8) -1;
 		ptr.ptr	= uint64_t(&idt);

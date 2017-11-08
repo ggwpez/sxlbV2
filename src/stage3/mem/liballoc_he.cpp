@@ -21,29 +21,48 @@ int liballoc_unlock()
 	return 0;
 }
 
-static uint64_t virt = 1024_GiB +PAGE_SIZE;
+static uint64_t virt_space = 1024_GiB;
 void* liballoc_alloc(int size)
 {
 	// Alloc page from page_alloc
 	// map it and return virtual address
 
-	uint64_t ret = virt;
-	assert(! (size %PAGE_SIZE));
-	for (size_t i = 0; i < (size /PAGE_SIZE); ++i)
+	size *= PAGE_SIZE;
+	uint64_t virt_orig = virt_space;
+	for (int i = 0; i < size; i += PAGE_SIZE)
 	{
-		assertp(virt);
-		ret_t code = memory::mmap(MMU::kPML4(), (void*)virt, (void*)memory::pages.alloc_page().page_ptr, PAGE_SIZE, false);
+		assertp(virt_space);
+		ret_t code = memory::mmap(nullptr, (void*)virt_space, (void*)memory::pages.alloc_page(), PAGE_SIZE);
 
 		if (code != RET_OK)
-			abort("MMAP failed");
-		virt += PAGE_SIZE;
+		{
+			// Beyond repair? TODO
+			if (code == RET_RB_FAIL)
+				return /*RET_RB_FAIL, */nullptr;
+			// Otherwise rollback TODO, check rollback state
+			memory::mumap(nullptr, (void*)virt_orig, i);
+			return nullptr;
+		}
+		virt_space += PAGE_SIZE;
 	}
 
-	return (void*)ret;
+	return (void*)virt_orig;
 }
 
-int liballoc_free(void*,int)
+int liballoc_free(void* virt, int size)
 {
+	assertp(virt);
+	size *= PAGE_SIZE;
+	ret_t code = memory::mumap(nullptr, virt, size_t(size));
 
-	return 0;
+	if (code == RET_OK)
+	{
+		virt_space -= size;
+		return 0;
+	}
+	else
+	{
+		abort("MUMAP FAILES");
+		return 1;
+	}
 }

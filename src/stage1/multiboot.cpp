@@ -1,4 +1,3 @@
-#include "kspace.h"
 #include "libc/string.hpp"
 #include "libk/mbi_iterator.hpp"
 #include "libc/assert.hpp"
@@ -10,7 +9,6 @@ multiboot_tag_module* init(void const* ptr, unsigned magic)
 
 	mbi_iterator it(ptr);
 	multiboot_tag const* tag;
-	uint32_t elf_entry = 0;
 
 	while ((tag = *it++))
 	{

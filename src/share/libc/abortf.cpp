@@ -15,7 +15,7 @@ void _abortf(char const* fmt, ...)
 	va_start(ap, fmt);
 	vsnprintf(buf, sizeof(buf), fmt, ap);
 	va_end(ap);
-	print_stack_trace();
+	//print_stack_trace();
 
 	_abort(buf);
 }

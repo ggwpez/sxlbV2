@@ -1,4 +1,3 @@
-#include "lspace.h"
 #include "stdio.hpp"
 
 int sprintf(char* buf, const char* fmt, ... )

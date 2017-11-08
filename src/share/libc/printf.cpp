@@ -1,4 +1,3 @@
-#include "lspace.h"
 #include "stdio.hpp"
 
 int printf(char __const* fmt, ... )

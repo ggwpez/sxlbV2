@@ -119,6 +119,7 @@ namespace cpu
 
 	uint32_t get_config(CPU_CONFIG_OP op);
 	uint32_t set_config(CPU_CONFIG_OP op, uint32_t v);
+	void* invlpg(void*);
 	void dump_all_config();
 
 	cpu_word_t get_creg(uint8_t number);

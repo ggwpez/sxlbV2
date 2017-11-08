@@ -26,3 +26,6 @@ typedef int ret_t;
 
 #define RET_OK 0
 #define RET_FAIL 1
+/// Rollback Fail, this means the system is in an unknown state and should abort
+/// Avoid at all costs to return RET_RB_FAIL in a function
+#define RET_RB_FAIL 2

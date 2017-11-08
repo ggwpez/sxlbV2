@@ -3,6 +3,8 @@
 #include "defines.hpp"
 #include "pml4_flags.hpp"
 
+#define MAKE_PTR constexpr void* pointer() { return (void*)(flags._pointer << 12); }
+
 namespace paging
 {
 	void init(char* free_space);
@@ -20,13 +22,14 @@ namespace paging
 			MAKE_PFLAGS
 			IGNORE(3)
 			MAKE_AVAIL_0_2
-			uint64_t pointer : 36;	// The page frame number of the PDPT of this PML4E.
+			uint64_t _pointer : 36;	// The page frame number of the PDPT of this PML4E.
 			IGNORE(4)
 			MAKE_AVAIL_3_13
 			uint64_t EXEC_OFF : 1;			// If 1, instruction fetches not allowed.
 		} flags __attribute__((packed));
 
 		uint64_t Value;
+		MAKE_PTR
 	};
 
 	// 1 GiB, maps 512 GiB
@@ -39,13 +42,14 @@ namespace paging
 			uint32_t SIZE : 1;
 			IGNORE(1)
 			MAKE_AVAIL_0_2
-			uint64_t pointer : 36;	// The page frame number of the PDPT of this PML4E.
+			uint64_t _pointer : 36;	// The page frame number of the PDPT of this PML4E.
 			IGNORE(4)
 			MAKE_AVAIL_3_13
 			uint64_t EXEC_OFF : 1;			// If 1, instruction fetches not allowed.
 		} flags __attribute__((packed));
 
 		uint64_t Value;
+		MAKE_PTR
 	};
 
 	// 2 MiB, maps 1 GiB
@@ -58,13 +62,14 @@ namespace paging
 			uint32_t SIZE : 1;
 			IGNORE(1)
 			MAKE_AVAIL_0_2
-			uint64_t pointer : 36;	// The page frame number of the PDPT of this PML4E.
+			uint64_t _pointer : 36;	// The page frame number of the PDPT of this PML4E.
 			IGNORE(4)
 			MAKE_AVAIL_3_13
 			uint64_t EXEC_OFF : 1;			// If 1, instruction fetches not allowed.
 		} flags __attribute__((packed));
 
 		uint64_t Value;
+		MAKE_PTR
 	};
 
 	// 4 KiB, maps 2 MiB
@@ -77,13 +82,14 @@ namespace paging
 			uint64_t PAGE_ATT_TAB : 1;
 			uint64_t GLOBAL : 1;
 			MAKE_AVAIL_0_2
-			uint64_t pointer : 36;	// The page frame number of the PDPT of this PML4E.
+			uint64_t _pointer : 36;	// The page frame number of the PDPT of this PML4E.
 			IGNORE(4)
 			MAKE_AVAIL_3_13
 			uint64_t EXEC_OFF : 1;			// If 1, instruction fetches not allowed.
 		} flags __attribute__((packed));
 
 		uint64_t Value;
+		MAKE_PTR
 	};
 }
 

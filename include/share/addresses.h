@@ -50,6 +50,11 @@ constexpr inline bool IS_CANONICAL(T const& ptr)
 							else if (DEBUG && IS_CANONICAL(tmp) == false)\
 								abortf("ASSERTION FAILURE\nPointer '%s' is NON-CANONICAL", #ptr);\
 						} while (0)
+#if DEBUG
+	#define assertd assert
+#else
+	#define assertd
+#endif
 
 extern uint32_t stage1_low;
 extern uint32_t stage1_high;
@@ -70,6 +75,8 @@ extern uint32_t stage3_high;
 
 #define STAGE1_PML4_PHY 256_KiB
 #define STAGE1_PML4_VMA 512_KiB
+
+#define TEMP_MAP_SPACE 8192_GiB
 
 // Exactly at PML4[510] bc. PML4[511] contains kernel data
 // ^ forget that above, must be in canonical form...

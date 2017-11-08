@@ -1,7 +1,5 @@
-#include "lspace.h"
 #include <stdint.h>
 #include "string.hpp"
-#include "lspace.h"
 #include "assert.hpp"
 
 void* memcpy(void* __dest, void const* __src, size_t n)

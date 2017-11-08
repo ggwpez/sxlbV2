@@ -36,6 +36,12 @@ constexpr inline auto ROUND_DW(T const& v, S const& m)
 #define STR_HELPER(x) #x
 #define STR(x) STR_HELPER(x)
 
+#if DEBUG
+	#define EXEC_DBG(exp) (exp)
+#else
+	#define EXEC_DBG(exp)
+#endif
+
 #define asmv(x) __asm__ __volatile__(x)
 #define asml "\t\n"
 

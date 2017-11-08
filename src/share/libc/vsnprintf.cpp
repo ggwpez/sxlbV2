@@ -1,4 +1,3 @@
-#include "lspace.h"
 #include "stdio.hpp"
 #include "string.hpp"
 #include "assert.hpp"
@@ -63,6 +62,10 @@ int vsnprintf(char* out, size_t n, const char* fmt, va_list arg)
 						break;
 					case 'P':
 						__toa<cpu_word_t>(reinterpret_cast<cpu_word_t>(va_arg(arg, void*)), buffer, 16, true);
+						i += bufcpy(out +i, buffer);
+						break;
+					case 'S':
+						__toa<size_t>(reinterpret_cast<size_t>(va_arg(arg, void*)), buffer, 16, true);
 						i += bufcpy(out +i, buffer);
 						break;
 					case 's':

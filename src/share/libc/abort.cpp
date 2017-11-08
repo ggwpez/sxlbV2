@@ -1,4 +1,3 @@
-#include "lspace.h"
 #include "abort.hpp"
 #include "stdio.hpp"
 

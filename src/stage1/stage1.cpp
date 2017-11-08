@@ -1,4 +1,3 @@
-#include "kspace.h"
 #include <stdint.h>
 #include "share/multiboot.h"
 #include "stage1/gdt-32.h"

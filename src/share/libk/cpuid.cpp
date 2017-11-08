@@ -1,4 +1,3 @@
-#include "lspace.h"
 #include "cpuid.hpp"
 #include "abort.hpp"
 #include "vga.hpp"
@@ -176,4 +175,13 @@ namespace cpu
 		asm volatile("wrmsr" : : "a"(uint32_t(value & 0xFFFFFFFF)), "d"(uint32_t((value >> 32) & 0xFFFFFFFF)), "c"(id));
 #endif
 	}
+
+#if __64__
+	void* invlpg(void* addr)
+	{
+		asm volatile ("invlpg [rax]" :: "A"(uint64_t(addr)));
+		return addr;
+	}
+#endif
+
 }
